@@ -1,5 +1,7 @@
 #include "./minishell.h"
 
+
+
 /*
 Control operators are:
 
@@ -24,6 +26,8 @@ t_type check_type(char *str)
         return(APPEND);
     else if (contains_meta_character(str))
         return(INVALID);
+    else if (ft_strnstr(str, BUILTIN) == 1)
+        return (BUILD_IN);
     else
         return (WORD);
     // Make the difference between command and args ? Need to check access_ok => command otherwise just args   
@@ -210,7 +214,7 @@ char *readline_open_quotes(char *str)
     return (res);
 }
 
-void infinite_read(void)
+void infinite_read(t_token **lst)
 {
     int i;
     char *line;
@@ -233,6 +237,7 @@ void infinite_read(void)
             break;
         cmd = ft_split(line, "\t\n|&;()<>");
         i = 0;
+        create_list(lst, cmd);
         while (cmd[i])
         {
             //clean_line(cmd[i]);
@@ -242,10 +247,15 @@ void infinite_read(void)
     }
 }
 
-int main()
+int main(int argc, char **argv, char **envp)
 {
+    t_token *list;
+    t_token **lst;
     char *line;
 
-    infinite_read();
+    list = NULL;
+    lst = &list;
+    infinite_read(lst);
+    show_list(list);
     return (0);
 }

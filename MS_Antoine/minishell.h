@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/12 18:03:00 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/15 19:48:05 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@
 # include <string.h>
 # include <unistd.h>
 
+# define BUILTIN  "echo:pwd:cd:export:unset:env:exit"
+# define METACHAR "\t:\n:|:&:;:(:):<:>"
+
 typedef enum type
 {
 	INVALID = 0,
@@ -30,6 +33,7 @@ typedef enum type
 	OUTPUT_REDIRECT,
 	HEREDOC,
 	APPEND,
+	BUILD_IN,
 	END
 }					t_type;
 
@@ -61,8 +65,13 @@ int					is_meta_character(char c);
 int					contains_meta_character(char *str);
 char				*ft_strjoin_newline(char const *s1, char const *s2);
 size_t				ft_strlcpy(char *dst, const char *src, size_t dstsize);
-
+t_token				*ft_lstnew(char *str);
 char				*readline_open_quotes(char *str);
 int					open_quotes(const char *str);
-
+int					create_list(t_token **start ,char **str);
+void				ft_lstadd_back(t_token **lst, t_token *new, char *str);
+void				free_stack(t_token **stack);
+int					ft_strnstr(const char *big, const char *little);
+void				show_list(t_token *list);
+int					ft_lstsize(t_token *lst);
 #endif
