@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/12 17:58:41 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/17 12:45:17 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,11 +114,70 @@ char	**ft_split(const char *s, const char *delim)
 	if (!s || !delim)
 		return (NULL);
 	count = count_words(s, delim);
-	printf("count: %d\n", count);
 	psplit = malloc(sizeof(char *) * (count + 1));
 	if (!psplit)
 		return (NULL);
 	if (split_word(psplit, s, delim, 0) == -1)
 		return (NULL);
 	return (psplit);
+}
+
+char	**ft_split_once_range(const char *s, char sep, int start, int end)
+{
+    char	**res;
+    int		i;
+    int		len;
+
+    if (!s || start < 0 || end < start)
+        return (NULL);
+    i = start;
+    while (s[i] && i <= end && s[i] != sep)
+        i++;
+    res = malloc(sizeof(char *) * 3);
+    if (!res)
+        return (NULL);
+    if (s[i] == sep && i <= end)
+    {
+        res[0] = ft_substr(s, 0, i);
+        res[1] = ft_substr(s, i + 1, ft_strlen(s) - i - 1);
+    }
+    else
+    {
+        res[0] = ft_strdup(s);
+        res[1] = NULL;
+    }
+    res[2] = NULL;
+    return (res);
+}
+
+char	**ft_split_dollar_range(const char *s, int start, int end)
+{
+    char	**arr;
+    int		i, j;
+
+    if (!s || start < 0 || end < start)
+        return (NULL);
+    i = start;
+    while (s[i] && i <= end && s[i] != '$')
+        i++;
+    arr = malloc(sizeof(char *) * 4);
+    if (!arr)
+        return (NULL);
+    if (s[i] == '$' && i <= end)
+    {
+        arr[0] = ft_substr(s, 0, i);
+        j = i + 1;
+        while (s[j] && ((s[j] >= 'A' && s[j] <= 'Z') || (s[j] >= 'a' && s[j] <= 'z') || (s[j] == '_')))
+            j++;
+        arr[1] = ft_substr(s, i, j - i);
+        arr[2] = s[j] ? ft_strdup(s + j) : NULL;
+    }
+    else
+    {
+        arr[0] = ft_strdup(s);
+        arr[1] = NULL;
+        arr[2] = NULL;
+    }
+    arr[3] = NULL;
+    return (arr);
 }

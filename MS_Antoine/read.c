@@ -1,6 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   read.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
+/*   Updated: 2025/06/17 16:53:39 by agaroux          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "./minishell.h"
-
-
 
 /*
 Control operators are:
@@ -26,8 +36,6 @@ t_type check_type(char *str)
         return(APPEND);
     else if (contains_meta_character(str))
         return(INVALID);
-    else if (ft_strnstr(str, BUILTIN) == 1)
-        return (BUILD_IN);
     else
         return (WORD);
     // Make the difference between command and args ? Need to check access_ok => command otherwise just args   
@@ -94,168 +102,62 @@ void separate_tokens(char *str)
     }
 }
 
-//eliminating double quotes
-char *double_quotes(char *str, int start, int end)
+void	infinite_read(char **env)
 {
-    char *res;
-    int index_str;
-    int index_res;
+    char	*line;
 
-    index_str = 0;
-    index_res = 0;
-    res = malloc(sizeof(char) * strlen(str) + 1);
-    if (!res)
-        return (NULL);
-    while (index_str < start)
-        res[index_res++] = str[index_str++];
-    while (index_str <= end + 1)
-    {
-        if (str[index_str] != '\"')
-            res[index_res++] = str[index_str++];
-        else
-            index_str++;
-    }
-    while (str[index_str])
-        res[index_res++] = str[index_str++];
-    res[index_res] = 0;
-    free(str);
-    return (res);
-}
-//eliminating single_quotes
-char *single_quotes(char *str, int start, int end)
-{
-    char *res;
-    int index_str;
-    int index_res;
-
-    index_str = 0;
-    index_res = 0;
-    res = malloc(sizeof(char) * strlen(str) + 1);
-    if (!res)
-        return (NULL);
-    while (index_str < start)
-        res[index_res++] = str[index_str++];
-    while (index_str <= end + 1)
-    {
-        if (str[index_str] != '\'')
-            res[index_res++] = str[index_str++];
-        else
-            index_str++;
-    }
-    while (str[index_str])
-        res[index_res++] = str[index_str++];
-    res[index_res] = 0;
-    free(str);
-    return (res);
-}
-
-//formatting the lines if their are single of double quotes
-char *clean_line(char *str)
-{
-    int i = 0;
-    int start = -1;
-    int end = -1;
-
-    while (str[i])
-    {
-        if (str[i] == '\'')
-        {
-            start = i;
-            while (str[i++] && str[i] != '\'')
-                end = i;
-            if (str[i] == '\'')
-                str = single_quotes(str, start, end);
-        }
-        else if (str[i] == '\"')
-        {
-            start = i;
-            while (str[i++] && str[i] != '\"')
-                end = i;
-            if (str[i] == '\"')
-                str = double_quotes(str, start, end);
-        }
-        i++;
-    }
-    return (str);
-}
-
-// check that quotes are still while reading the line
-int open_quotes(const char *str)
-{
-    int s = 0, d = 0, i = 0;
-    while (str[i])
-    {
-        if (str[i] == '\'' && d % 2 == 0)
-            s++;
-        else if (str[i] == '\"' && s % 2 == 0)
-            d++;
-        i++;
-    }
-    printf("s: %d, d: %d, i: %d\n", s, d, i);
-    return (s % 2 != 0 || d % 2 != 0);
-}
-
-char *readline_open_quotes(char *str)
-{
-    char *tmp;
-    char *res;
-
-    tmp = readline("quote> ");
-    if (!tmp)
-    {
-        free(str); // Free the original string if readline fails
-        return (NULL);
-    }
-    res = ft_strjoin_newline(str, tmp);
-    free(str); // Free the original string after joining
-    free(tmp); // Free the temporary string
-    if (!res)
-        return (NULL);
-    return (res);
-}
-
-void infinite_read(t_token **lst)
-{
-    int i;
-    char *line;
-    char **cmd;
-    
     while (1)
     {
-        line = readline("Minishell> ");
-        while (open_quotes(line))
-            line = readline_open_quotes(line);
+        line = get_input();
         if (!line)
             continue;
-        printf("%s\n", line);
         add_history(line);
         if (!strcmp(line, "clear"))
             clear_history();
-        //when signal ctrl + C
-        //rl_on_new_line();
         if (!strcmp(line, "exit"))
-            break;
-        cmd = ft_split(line, "\t\n|&;()<>");
-        i = 0;
-        create_list(lst, cmd);
-        while (cmd[i])
         {
-            //clean_line(cmd[i]);
-            printf("Token: %s, Type: %d\n", cmd[i], check_type(cmd[i]));
-            i++;
+            free(line);
+            break ;
         }
+        process_tokens(line, env);
     }
 }
 
-int main(int argc, char **argv, char **envp)
+static char	*get_input(void)
 {
-    t_token *list;
-    t_token **lst;
-    char *line;
+    char	*line;
+    char    *tmp;
 
-    list = NULL;
-    lst = &list;
-    infinite_read(lst);
-    show_list(list);
+    line = readline("Minishell> ");
+    while (open_quotes(line))
+    {
+        tmp = readline_open_quotes(line);
+        free(line);
+        line = tmp;
+    }
+    return (line);
+}
+
+static void	process_tokens(char *line, char **env)
+{
+    char	**cmd;
+    int		i;
+
+    line = unquoted_var_expansion(line, env);
+    line = clean_line(line, env);
+    cmd = ft_split(line, "\t\n|&;()<>");
+    i = 0;
+    while (cmd && cmd[i])
+    {
+        printf("Token: %s, Type: %d\n", cmd[i], check_type(cmd[i]));
+        i++;
+    }
+}
+
+int	main(int argc, char **argv, char **env)
+{
+    (void)argc;
+    (void)argv;
+    infinite_read(env);
     return (0);
 }
