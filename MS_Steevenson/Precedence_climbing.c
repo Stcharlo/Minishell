@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 20:18:29 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/15 20:19:13 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/18 17:40:32 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,27 @@
 
 #include "minishell.h"
 
-void recognize_builtin(t_token **lst)
+void recognize_builtin(t_token **lst, char **env)
 {
+	t_token *current;
+	
+	current = *lst;
+	if (ft_strnstr(BUILTIN, current->value))
+	{
+		if (ft_strnstr("pwd", current->value))
+			pwd_recognition(lst, env);
+		if (ft_strnstr("env", current->value))
+			env_recognition(lst, env);
+		if (ft_strnstr("echo", current->value))
+			echo_recognition(lst, env);
+		if (ft_strnstr("cd", current->value))
+			cd_recognition(lst, env);
+		if (ft_strnstr("export", current->value))
+		if (ft_strnstr("unset", current->value))
+		if (ft_strnstr("exit", current->value))
+		return ;
+	}
+	return ;
 	//pwd ignore ce qui est ecrit derriere lui et ne prends pas d'option
 	//echo prends ce qui est derriere lui jusqua une redirection ou un operateur
 	//cd prend un path relatif(a partir du dossier actuelle) ou un path absolu
@@ -23,6 +42,58 @@ void recognize_builtin(t_token **lst)
 	//unset sans arguments valide ne fait rien
 	//env ne prends rien derriere
 	// exit ne prends rien derriere
+}
+void echo_recognition(t_token **lst, char **envp)
+{
+	t_token *current;
+	
+	current = *lst;
+	current = current ->next;
+	while (current && current->type == 1)
+	{
+		printf("%s", current->value);
+		printf(" ");
+		current = current->next;
+	}
+	printf ("\n");
+	return ;
+}
+
+void env_recognition(t_token **lst, char **envp)
+{
+	int i;
+
+	i = 0;
+	while(envp[i])
+	{
+		printf("%s\n", envp[i]);
+		i++;
+	}
+	return ;
+}
+
+void pwd_recognition(t_token **lst, char **envp)
+{
+	int i;
+	int j;
+	
+	i = 0;
+	j = 7;
+	while (ft_strnstr(envp[i],"PWD=") != 1)
+		i++;
+	if (!envp[i])
+		return ;
+	if (ft_strnstr(envp[i],"PWD=") == 1)
+	{
+		while (envp[i][j] != '\0')
+		{
+			printf("%c", envp[i][j]);
+			j++;
+		}
+		printf("\n");
+		i++;
+	}
+	return ;
 }
 
 void priority_check(t_token **lst)
