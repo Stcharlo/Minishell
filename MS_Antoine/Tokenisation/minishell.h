@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/17 17:18:12 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/18 17:02:52 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
+# include <fcntl.h>
 
 typedef enum type
 {
@@ -37,7 +38,9 @@ typedef enum
 {
 	NODE_COMMAND,
 	NODE_ARGUMENT,
-	NODE_REDIRECTION
+	NODE_REDIRECTION,
+	NODE_TARGET,
+	NODE_PIPE,
 }					NodeType;
 
 typedef struct s_token
@@ -50,7 +53,7 @@ typedef struct s_token
 typedef struct ASTNode
 {
 	NodeType		type;
-	char			*word;
+	char			*value;
 	struct ASTNode	**children;
 	int				child_count;
 }					ASTNode;
@@ -83,8 +86,6 @@ void				infinite_read(char **env);
 char				*get_value(char *var, int n, char **env);
 
 char				*unquoted_var_expansion(char *str, char **env);
-char				*expand_unquoted_var_at(char *str, int start, int len,
-						char **env);
 char				*expand_variable(char *str, char **env);
 static int			find_next_expand(const char *str, int *start, int *len);
 static char			*expand_one(const char *str, int start, int len,
