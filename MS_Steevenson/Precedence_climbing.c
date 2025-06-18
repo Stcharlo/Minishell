@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 20:18:29 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/18 17:40:32 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/18 19:05:33 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,27 @@ void recognize_builtin(t_token **lst, char **env)
 	//env ne prends rien derriere
 	// exit ne prends rien derriere
 }
+
+void cd_recognition(t_token **lst, char **envp)
+{
+	t_token *current;
+	char buffer[1024];
+	
+	current = *lst;
+	current = current->next;
+
+	if (getcwd(buffer, sizeof(buffer)) != NULL)
+		printf("%s\n", buffer);
+	if (!current)
+		return ;
+	if (access(current->value, R_OK) != 0)
+		perror("access");
+	if (chdir(current->value) != 0)
+		perror("chdir");
+	if (getcwd(buffer, sizeof(buffer)) != NULL)
+		printf("%s\n", buffer);
+	return ;
+}
 void echo_recognition(t_token **lst, char **envp)
 {
 	t_token *current;
@@ -78,16 +99,19 @@ void pwd_recognition(t_token **lst, char **envp)
 	int j;
 	
 	i = 0;
-	j = 7;
+	j = 0;
 	while (ft_strnstr(envp[i],"PWD=") != 1)
 		i++;
 	if (!envp[i])
 		return ;
 	if (ft_strnstr(envp[i],"PWD=") == 1)
 	{
+		while(envp[i][j] != '=')
+			j++;
+		j++;
 		while (envp[i][j] != '\0')
 		{
-			printf("%c", envp[i][j]);
+			write(1 ,&envp[i][j], 1);
 			j++;
 		}
 		printf("\n");

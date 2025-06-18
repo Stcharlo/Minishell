@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/18 16:57:47 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/18 18:41:57 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
+# include <dirent.h>
 
 # define BUILTIN  "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
@@ -105,4 +106,5 @@ void				recognize_builtin(t_token **lst, char **env);
 void				pwd_recognition(t_token **lst, char **envp);
 void				env_recognition(t_token **lst, char **envp);
 void				echo_recognition(t_token **lst, char **envp);
+void				cd_recognition(t_token **lst, char **envp);
 #endif
