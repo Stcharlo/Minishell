@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Precedence_climbing.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 20:18:29 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/18 19:05:33 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/19 16:16:13 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TOUT SA JE VAIS LE CODER PLUS TARD
 
-#include "minishell.h"
+#include "../includes/minishell.h"
 
 void recognize_builtin(t_token **lst, char **env)
 {

@@ -6,11 +6,11 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 17:10:09 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/17 17:59:11 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/19 16:16:22 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../includes/minishell.h"
 
 char	*unquoted_var_expansion(char *str, char **env)
 {

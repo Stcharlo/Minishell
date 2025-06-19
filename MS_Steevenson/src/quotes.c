@@ -6,11 +6,11 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:46:39 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/17 18:07:48 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/19 16:15:57 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../includes/minishell.h"
 
 char *get_value(char *var, int n, char **env)
 {
@@ -25,6 +25,7 @@ char *get_value(char *var, int n, char **env)
     }
     if (!env[i])
         return (NULL);
+    return (NULL);
 }
 
 //eliminating double quotes & expanding variables

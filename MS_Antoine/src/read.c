@@ -6,11 +6,11 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/17 16:53:39 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/19 16:15:48 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Control operators are:
@@ -45,7 +45,7 @@ ASTNode *create_ast(NodeType type, char *word)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = type;
-    node->word = word;
+    node->value = word;
     node->children = NULL;
     node->child_count = 0;
     return (node);
@@ -102,7 +102,7 @@ void separate_tokens(char *str)
     }
 }
 
-void	infinite_read(char **env)
+void	infinite_read(t_token **lst , char **env)
 {
     char	*line;
 
@@ -119,7 +119,7 @@ void	infinite_read(char **env)
             free(line);
             break ;
         }
-        process_tokens(line, env);
+        process_tokens(lst, line, env);
     }
 }
 
@@ -138,7 +138,7 @@ static char	*get_input(void)
     return (line);
 }
 
-static void	process_tokens(char *line, char **env)
+static void	process_tokens(t_token **lst ,char *line, char **env)
 {
     char	**cmd;
     int		i;
@@ -152,12 +152,23 @@ static void	process_tokens(char *line, char **env)
         printf("Token: %s, Type: %d\n", cmd[i], check_type(cmd[i]));
         i++;
     }
+    create_list(lst, cmd);
+    recognize_builtin(lst, env);
+    free_stack(lst);
 }
 
 int	main(int argc, char **argv, char **env)
 {
     (void)argc;
     (void)argv;
-    infinite_read(env);
+    
+    t_token *list;
+    t_token **lst;
+    char *line;
+
+    list = NULL;
+    lst = &list;
+    infinite_read(lst, env);
+    show_list(list);
     return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/18 17:02:52 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/19 16:10:56 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,11 @@
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
+# include <dirent.h>
 # include <fcntl.h>
+
+# define BUILTIN  "echo:pwd:cd:export:unset:env:exit"
+# define METACHAR "\t:\n:|:&:;:(:):<:>"
 
 typedef enum type
 {
@@ -80,14 +84,30 @@ void				*ft_calloc(size_t nmemb, size_t size);
 char				*ft_strjoin(char const *s1, char const *s2);
 char				*ft_strchr(const char *s, int c);
 
-static void			process_tokens(char *line, char **env);
+static void			process_tokens(t_token **lst, char *line, char **env);
 static char			*get_input(void);
-void				infinite_read(char **env);
+void				infinite_read(t_token **lst, char **env);
 char				*get_value(char *var, int n, char **env);
 
 char				*unquoted_var_expansion(char *str, char **env);
+char				*expand_unquoted_var_at(char *str, int start, int len,
+						char **env);
 char				*expand_variable(char *str, char **env);
 static int			find_next_expand(const char *str, int *start, int *len);
 static char			*expand_one(const char *str, int start, int len,
 						char **env);
+						
+int					ft_strnstr(char *big, char *little);
+void				show_list(t_token *list);
+void				free_stack(t_token **stack);
+int					ft_lstsize(t_token *lst);
+void				ft_lstadd_back(t_token **lst, t_token *new, char *str);
+int					create_list(t_token **start ,char **str);
+t_token				*ft_lstnew(char *str);
+
+void				recognize_builtin(t_token **lst, char **env);
+void				pwd_recognition(t_token **lst, char **envp);
+void				env_recognition(t_token **lst, char **envp);
+void				echo_recognition(t_token **lst, char **envp);
+void				cd_recognition(t_token **lst, char **envp);
 #endif

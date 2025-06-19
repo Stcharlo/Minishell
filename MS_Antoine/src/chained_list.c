@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   chained_list.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 18:24:00 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/18 16:10:28 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/19 16:16:26 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../includes/minishell.h"
 
 t_token *ft_lstnew(char *str)
 {

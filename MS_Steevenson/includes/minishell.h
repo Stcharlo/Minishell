@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/18 18:41:57 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/19 16:10:56 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <string.h>
 # include <unistd.h>
 # include <dirent.h>
+# include <fcntl.h>
 
 # define BUILTIN  "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
@@ -41,7 +42,9 @@ typedef enum
 {
 	NODE_COMMAND,
 	NODE_ARGUMENT,
-	NODE_REDIRECTION
+	NODE_REDIRECTION,
+	NODE_TARGET,
+	NODE_PIPE,
 }					NodeType;
 
 typedef struct s_token
@@ -54,7 +57,7 @@ typedef struct s_token
 typedef struct ASTNode
 {
 	NodeType		type;
-	char			*word;
+	char			*value;
 	struct ASTNode	**children;
 	int				child_count;
 }					ASTNode;

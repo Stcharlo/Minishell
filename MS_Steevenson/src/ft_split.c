@@ -6,11 +6,11 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/17 12:45:17 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/19 16:16:19 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../includes/minishell.h"
 
 static int	is_delimiter(char c, const char *delim)
 {

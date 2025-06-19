@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   read.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/18 17:11:38 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/06/19 16:15:48 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Control operators are:
@@ -45,7 +45,7 @@ ASTNode *create_ast(NodeType type, char *word)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = type;
-    node->word = word;
+    node->value = word;
     node->children = NULL;
     node->child_count = 0;
     return (node);

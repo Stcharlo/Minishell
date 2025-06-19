@@ -6,11 +6,11 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/17 13:34:03 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/19 16:16:16 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../includes/minishell.h"
 
 void	*ft_calloc(size_t nmemb, size_t size)
 {
