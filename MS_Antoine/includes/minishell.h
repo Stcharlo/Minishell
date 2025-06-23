@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:10:56 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/23 11:53:37 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,16 @@
 # define MINISHELL_H
 
 # include <ctype.h>
+# include <dirent.h>
+# include <fcntl.h>
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
-# include <dirent.h>
-# include <fcntl.h>
 
-# define BUILTIN  "echo:pwd:cd:export:unset:env:exit"
+# define BUILTIN "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
 
 typedef enum type
@@ -62,6 +62,22 @@ typedef struct ASTNode
 	int				child_count;
 }					ASTNode;
 
+// ast
+ASTNode				*create_ast_node(NodeType type, char *value);
+void				add_ast_child(ASTNode *parent, ASTNode *child);
+static char			*ft_strjoin_slash(char const *s1, char const *s2);
+char				*get_cmd_path(const char *cmd, char **env);
+NodeType			define_type(char *str, char **env);
+void				ast_print(ASTNode *node, int indent);
+void				count_commands(t_token *lst, char **env, int *count_heads);
+void				ast_free(ASTNode *node);
+static void			fill_ast_nodes(ASTNode **head, t_token *lst, char **env);
+static void			chain_ast_nodes(ASTNode **head, int total);
+void				push_node_on_top(ASTNode **head, int a);
+void				rotate_nodes(ASTNode **head, int a, int b);
+void				reorder_ast_nodes(ASTNode **head, int total);
+ASTNode				**build_and_print_ast(t_token *lst, char **env);
+
 char				**ft_split(const char *s, const char *delim);
 char				*ft_strdup(const char *s1);
 size_t				ft_strlen(char const *src);
@@ -96,13 +112,13 @@ char				*expand_variable(char *str, char **env);
 static int			find_next_expand(const char *str, int *start, int *len);
 static char			*expand_one(const char *str, int start, int len,
 						char **env);
-						
+
 int					ft_strnstr(char *big, char *little);
 void				show_list(t_token *list);
 void				free_stack(t_token **stack);
 int					ft_lstsize(t_token *lst);
 void				ft_lstadd_back(t_token **lst, t_token *new, char *str);
-int					create_list(t_token **start ,char **str);
+int					create_list(t_token **start, char **str);
 t_token				*ft_lstnew(char *str);
 
 void				recognize_builtin(t_token **lst, char **env);
@@ -110,4 +126,6 @@ void				pwd_recognition(t_token **lst, char **envp);
 void				env_recognition(t_token **lst, char **envp);
 void				echo_recognition(t_token **lst, char **envp);
 void				cd_recognition(t_token **lst, char **envp);
+
+void				execute_nodes(ASTNode **head);
 #endif

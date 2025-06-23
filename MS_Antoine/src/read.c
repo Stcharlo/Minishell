@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:15:48 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/23 11:41:09 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ static char	*get_input(void)
 
 static void	process_tokens(t_token **lst ,char *line, char **env)
 {
+    ASTNode **nodes;
     char	**cmd;
     int		i;
 
@@ -153,7 +154,9 @@ static void	process_tokens(t_token **lst ,char *line, char **env)
         i++;
     }
     create_list(lst, cmd);
+    nodes = build_and_print_ast(*lst, env);
     recognize_builtin(lst, env);
+    execute_nodes(nodes);
     free_stack(lst);
 }
 

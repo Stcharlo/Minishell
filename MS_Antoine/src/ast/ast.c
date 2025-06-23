@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ast_2.c                                            :+:      :+:    :+:   */
+/*   ast.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:11:47 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/23 11:35:00 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "../../includes/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -115,21 +115,18 @@ void ast_print(ASTNode *node, int indent) {
     }
 }
 
-void count_commands(char **argv, char **env, int *count_heads)
+void count_commands(t_token *lst, char **env, int *count_heads)
 {
-    int i;
-    
-    i = 1;
     *count_heads = 0;
-    while (argv[i])
+    while (lst)
     {
-        if (define_type(argv[i], env) == NODE_COMMAND)
+        if (define_type(lst->value, env) == NODE_COMMAND)
             (*count_heads)++;
-        else if (define_type(argv[i], env) == NODE_REDIRECTION)
+        else if (define_type(lst->value, env) == NODE_REDIRECTION)
             (*count_heads)++;
-        else if (define_type(argv[i], env) == NODE_PIPE)
+        else if (define_type(lst->value, env) == NODE_PIPE)
             (*count_heads)++;
-        i++;
+        lst = lst->next;
     }
 }
 
@@ -143,32 +140,32 @@ void ast_free(ASTNode *node) {
     free(node);
 }
 
-static void	fill_ast_nodes(ASTNode **head, char **argv, char **env)
+static void	fill_ast_nodes(ASTNode **head, t_token *lst, char **env)
 {
-    int	i;
     int j;
     int k;
 
-    i = 0;
     j = -1;
-    while (argv[++i])
+    while (lst)
     {
-        if (define_type(argv[i], env) == NODE_COMMAND)
-            head[++j] = create_ast_node(NODE_COMMAND, argv[i]);
-        else if (define_type(argv[i], env) == NODE_ARGUMENT)
+        if (define_type(lst->value, env) == NODE_COMMAND)
+            head[++j] = create_ast_node(NODE_COMMAND, lst->value);
+        else if (define_type(lst->value, env) == NODE_ARGUMENT)
         {
             k = 0;
             while (head[j - k]->type != NODE_COMMAND && head[j - k])
                 k++;
-            add_ast_child(head[j - k], create_ast_node(NODE_ARGUMENT, argv[i]));
+            add_ast_child(head[j - k], create_ast_node(NODE_ARGUMENT, lst->value));
         }
-        else if (define_type(argv[i], env) == NODE_PIPE)
-            head[++j] = create_ast_node(NODE_PIPE, argv[i]);
-        else if (define_type(argv[i], env) == NODE_REDIRECTION)
+        else if (define_type(lst->value, env) == NODE_PIPE)
+            head[++j] = create_ast_node(NODE_PIPE, lst->value);
+        else if (define_type(lst->value, env) == NODE_REDIRECTION)
         {
-            head[++j] = create_ast_node(NODE_REDIRECTION, argv[i++]);
-            add_ast_child(head[j], create_ast_node(NODE_TARGET, argv[i]));
+            head[++j] = create_ast_node(NODE_REDIRECTION, lst->value);
+            lst = lst->next;
+            add_ast_child(head[j], create_ast_node(NODE_TARGET, lst->value));
         }
+        lst = lst->next;
     }
 }
 
@@ -233,24 +230,18 @@ void reorder_ast_nodes(ASTNode **head, int total)
     } 
 }
 
-void	build_and_print_ast(int argc, char **argv, char **env)
+ASTNode 	**build_and_print_ast(t_token *lst, char **env)
 {
     int		count_heads;
     ASTNode	**head;
 
-    count_commands(argv, env, &count_heads);
+    count_commands(lst, env, &count_heads);
     head = malloc(sizeof(ASTNode *) * (count_heads));
     printf("Count heads: %d\n", count_heads);
-    fill_ast_nodes(head, argv, env);
+    fill_ast_nodes(head, lst, env);
     reorder_ast_nodes(head, count_heads);
-    chain_ast_nodes(head, count_heads); // think of also counting the PIPES
+    chain_ast_nodes(head, count_heads);
     ast_print(head[0], 1);
     ast_free(head[0]);
-    free(head);
-}
-
-int main(int argc, char **argv, char **env)
-{
-    build_and_print_ast(argc, argv, env);
-    return (1);
+    return (head);
 }
