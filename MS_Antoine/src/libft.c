@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:16:16 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/23 14:39:40 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,7 @@ char	*ft_strjoin_buffer(char const *s1, char const *s2, char buffer)
 	str[i] = '\0';
 	return (str);
 }
+
 
 char	*ft_strjoin(char const *s1, char const *s2)
 {

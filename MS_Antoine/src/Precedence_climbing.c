@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 20:18:29 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/19 16:16:13 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/30 13:49:27 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #include "../includes/minishell.h"
 
-void recognize_builtin(t_token **lst, char **env)
+int recognize_builtin(t_token **lst, char **env)
 {
 	t_token *current;
 	
@@ -32,9 +32,9 @@ void recognize_builtin(t_token **lst, char **env)
 		if (ft_strnstr("export", current->value))
 		if (ft_strnstr("unset", current->value))
 		if (ft_strnstr("exit", current->value))
-		return ;
+		return (1);
 	}
-	return ;
+	return (0);
 	//pwd ignore ce qui est ecrit derriere lui et ne prends pas d'option
 	//echo prends ce qui est derriere lui jusqua une redirection ou un operateur
 	//cd prend un path relatif(a partir du dossier actuelle) ou un path absolu

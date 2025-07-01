@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/23 11:41:09 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/30 14:45:48 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Redirection operators are:
 <, >, <<, >>, <&, >|, <←, <>, >&
 */
 
-t_type check_type(char *str)
+int check_type(char *str)
 {
     if (!strcmp(str, "|"))
         return (PIPE);
@@ -41,7 +41,7 @@ t_type check_type(char *str)
     // Make the difference between command and args ? Need to check access_ok => command otherwise just args   
 }
 
-ASTNode *create_ast(NodeType type, char *word)
+ASTNode *create_ast(int type, char *word)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = type;
@@ -111,6 +111,11 @@ void	infinite_read(t_token **lst , char **env)
         line = get_input();
         if (!line)
             continue;
+        if (line[0] == 0)
+            {
+                free(line);
+                continue;
+            }
         add_history(line);
         if (!strcmp(line, "clear"))
             clear_history();
@@ -156,7 +161,7 @@ static void	process_tokens(t_token **lst ,char *line, char **env)
     create_list(lst, cmd);
     nodes = build_and_print_ast(*lst, env);
     recognize_builtin(lst, env);
-    execute_nodes(nodes);
+    execute_nodes(nodes, env);
     free_stack(lst);
 }
 
