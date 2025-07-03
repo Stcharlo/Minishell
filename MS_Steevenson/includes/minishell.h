@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:10:56 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/29 18:43:55 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,14 @@ typedef struct ASTNode
 	int				child_count;
 }					ASTNode;
 
+// Pour les test
+
+typedef struct s_env
+{
+	char **env;
+	char **export;
+}	t_env;
+
 char				**ft_split(const char *s, const char *delim);
 char				*ft_strdup(const char *s1);
 size_t				ft_strlen(char const *src);
@@ -83,6 +91,7 @@ char				*ft_substr(char const *s, unsigned int start, size_t len);
 void				*ft_calloc(size_t nmemb, size_t size);
 char				*ft_strjoin(char const *s1, char const *s2);
 char				*ft_strchr(const char *s, int c);
+int					ft_strnstr(char *big, char *little);
 
 static void			process_tokens(t_token **lst, char *line, char **env);
 static char			*get_input(void);
@@ -105,9 +114,24 @@ void				ft_lstadd_back(t_token **lst, t_token *new, char *str);
 int					create_list(t_token **start ,char **str);
 t_token				*ft_lstnew(char *str);
 
-void				recognize_builtin(t_token **lst, char **env);
-void				pwd_recognition(t_token **lst, char **envp);
-void				env_recognition(t_token **lst, char **envp);
-void				echo_recognition(t_token **lst, char **envp);
-void				cd_recognition(t_token **lst, char **envp);
+// Pour les test
+void				recognize_builtin(char **argv, char **env);
+void				pwd_recognition(char **argv, t_env **env);
+void				env_recognition(char **argv, t_env **env);
+void				echo_recognition(char **argv, t_env **env);
+void				cd_recognition(char **argv, int i);
+void 				Build_in(char **argv, int i, t_env **env);
+void 				export_recognition(char **argv, int i, t_env **env);
+void				add_export(char **argv, int s, t_env **env);
+void				show_env(t_env **env);
+void				unset_env(char **argv, int i, t_env **env);
+void				unset_recognition(char **argv, int i, t_env **env);
+void 				show_export(t_env **env);
+char				*cat_dup(char *s1);
+int					parse_exp(char *argv);
+int					check_dbl_equal(char *argv);
+int					skip_isspace(char *argv);
+void				add_env(char **argv, int s, t_env **env);
+int					ft_strncmp(const char *s1, const char *s2, size_t n);
+void				unset_exp(char **argv, int i, t_env **env);
 #endif

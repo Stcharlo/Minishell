@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Precedence_climbing.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 20:18:29 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/19 16:16:13 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/06/20 15:52:58 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void recognize_builtin(t_token **lst, char **env)
 		if (ft_strnstr("cd", current->value))
 			cd_recognition(lst, env);
 		if (ft_strnstr("export", current->value))
+			//export_recognition(lst, env);
 		if (ft_strnstr("unset", current->value))
 		if (ft_strnstr("exit", current->value))
 		return ;
@@ -49,19 +50,15 @@ void cd_recognition(t_token **lst, char **envp)
 	t_token *current;
 	char buffer[1024];
 	
+	if (!current)
+		return ;
 	current = *lst;
 	current = current->next;
-
-	if (getcwd(buffer, sizeof(buffer)) != NULL)
-		printf("%s\n", buffer);
 	if (!current)
 		return ;
 	if (access(current->value, R_OK) != 0)
-		perror("access");
+		printf("cd: %s: No such file or directory\n", current->value);
 	if (chdir(current->value) != 0)
-		perror("chdir");
-	if (getcwd(buffer, sizeof(buffer)) != NULL)
-		printf("%s\n", buffer);
 	return ;
 }
 void echo_recognition(t_token **lst, char **envp)
@@ -70,6 +67,8 @@ void echo_recognition(t_token **lst, char **envp)
 	
 	current = *lst;
 	current = current ->next;
+	if (current && current->type != 1)
+		printf("bash: syntax error near unexpected token 'newline'");
 	while (current && current->type == 1)
 	{
 		printf("%s", current->value);
@@ -85,6 +84,8 @@ void env_recognition(t_token **lst, char **envp)
 	int i;
 
 	i = 0;
+	if(!envp)
+		return ;
 	while(envp[i])
 	{
 		printf("%s\n", envp[i]);
@@ -95,29 +96,14 @@ void env_recognition(t_token **lst, char **envp)
 
 void pwd_recognition(t_token **lst, char **envp)
 {
-	int i;
-	int j;
+	char *user;
 	
-	i = 0;
-	j = 0;
-	while (ft_strnstr(envp[i],"PWD=") != 1)
-		i++;
-	if (!envp[i])
-		return ;
-	if (ft_strnstr(envp[i],"PWD=") == 1)
-	{
-		while(envp[i][j] != '=')
-			j++;
-		j++;
-		while (envp[i][j] != '\0')
-		{
-			write(1 ,&envp[i][j], 1);
-			j++;
-		}
-		printf("\n");
-		i++;
+	user = getenv("PWD");
+	if (user != NULL)
+		printf("%s\n", user);
+	else {
+		perror("getenv");
 	}
-	return ;
 }
 
 void priority_check(t_token **lst)

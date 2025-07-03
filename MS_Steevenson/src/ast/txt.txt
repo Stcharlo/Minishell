@@ -1,0 +1,44 @@
+echo
+
+HEAD
+\ COMMAND = echo
+
+echo hello
+
+HEAD
+\ COMMAND = echo
+\ \ ARG = hello
+
+< 1.txt cat > 2.txt -e
+
+HEAD
+\ REDIRECTION <
+\ \ TARGET = 1.txt
+\ COMMAND = cat
+\ \ ARG = -e
+\ REDIRECTION >
+\ \ TARGET = 2.txt
+
+HEAD
+\ REDIRECTION <
+\ \ TARGET = 1.txt
+\ \ COMMAND = cat
+\ \ \ ARG = -e
+\ \ \ REDIRECTION >
+\ \ \ \ TARGET = 2.txt
+
+ls -l | cat -e
+
+HEAD
+\ PIPE
+\ \ COMMAND = ls
+\ \ \ ARG = -l
+\ \ COMMAND = cat
+\ \ \ ARG = -e
+
+HEAD
+\ PIPE
+\ \ COMMAND = ls
+\ \ ARG = -l
+\ \ COMMAND = cat
+\ \ ARG = -e
