@@ -3,14 +3,102 @@
 /*                                                        :::      ::::::::   */
 /*   exec_mine.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/01 17:23:04 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/02 17:57:59 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+
+static void	apply_output_redirections(ASTNode *node)
+{
+    int		count;
+    int		i;
+    ASTNode	*redir;
+
+    count = 0;
+    i = 0;
+    while (i < node->child_count)
+    {
+        redir = node->children[i];
+        if (redir->type == NODE_REDIRECTION &&
+            (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
+            count++;
+        i++;
+    }
+    if (count == 0)
+        return ;
+    if (count == 1)
+    {
+        i = 0;
+        while (i < node->child_count)
+        {
+            redir = node->children[i];
+            if (redir->type == NODE_REDIRECTION &&
+                (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
+            {
+                if (!ft_strcmp(redir->value, ">"))
+                    dup2(open(redir->target->value, O_WRONLY | O_CREAT | O_TRUNC, 0644), STDOUT_FILENO);
+                else
+                    dup2(open(redir->target->value, O_WRONLY | O_CREAT | O_APPEND, 0644), STDOUT_FILENO);
+                break ;
+            }
+            i++;
+        }
+    }
+    else
+    {
+        int		pipefd[2];
+        pid_t	pid;
+
+        if (pipe(pipefd) < 0)
+        {
+            perror("pipe");
+            exit(1);
+        }
+        pid = fork();
+        if (pid < 0)
+        {
+            perror("fork");
+            exit(1);
+        }
+        if (pid == 0)
+        {
+            /* Child process: run tee to duplicate output to all targets */
+            close(pipefd[1]);
+            {
+                char	**targets;
+                int		j;
+
+                targets = malloc(sizeof(char *) * (count + 1));
+                if (!targets)
+                {
+                    perror("malloc");
+                    exit(1);
+                }
+                j = 0;
+                i = 0;
+                while (i < node->child_count)
+                {
+                    redir = node->children[i];
+                    if (redir->type == NODE_REDIRECTION &&
+                        (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
+                        targets[j++] = redir->target->value;
+                    i++;
+                }
+                targets[j] = NULL;
+                ft_tee(targets, count);
+            }
+            exit(0);
+        }
+        /* Parent: redirect STDOUT to tee pipe */
+        close(pipefd[0]);
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[1]);
+    }
+}
 
 void	exec_cmd(ASTNode *node, char **env)
 {
@@ -35,9 +123,10 @@ void	exec_cmd(ASTNode *node, char **env)
 		printf("%s\n", tab[0]);
 	if (tab[1])
 		printf("%s\n", tab[1]);*/
-	apply_redirections(node, tab, env);
+	//apply_redirections(node, tab, env);
+	apply_output_redirections(node);
 	execve(get_cmd_path(tab[0], env), tab, env);
-	perror("execve");
+    perror("execve");
 	exit(1);
 }
 
@@ -72,7 +161,6 @@ void apply_redirections(ASTNode *node, char **tab, char **env)
                 dup2(fd, STDOUT_FILENO);
             close(fd);
             // Move to next nested redirection (if any)
-			execve(get_cmd_path(tab[0], env), tab, env);
             redir = redir->left;
         }
     }

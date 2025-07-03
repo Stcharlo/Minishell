@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/01 17:22:38 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/02 18:10:29 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ ASTNode					**build_and_print_ast(t_token *lst, char **env);
 char					**ft_split(const char *s, const char *delim);
 char					*ft_strdup(const char *s1);
 size_t					ft_strlen(char const *src);
+int 					ft_strcmp(char *s1, char *s2);
 int						check_type(char *str);
 int						is_meta_character(char c);
 int						contains_meta_character(char *str);
@@ -161,4 +162,10 @@ void					exec_ast(ASTNode *node, char **env, int input_fd,
 void					exec_cmd(ASTNode *node, char **env);
 void					apply_redirections(ASTNode *node, char **tab, char **en);
 
+//tee
+int     count_trunc_append(ASTNode *node);
+static int	*open_targets(ASTNode *node);
+static void	cleanup(int *fds, int num_files, char *buffer);
+static void	write_loop(int *fds, int num_files, char *buffer);
+void	ft_tee(char **targets, int count);
 #endif

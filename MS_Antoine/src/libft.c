@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/23 14:39:40 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/02 18:08:59 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,3 +180,12 @@ char	*ft_strchr(const char *s, int c)
 		return ((char *)(s + i));
 	return (0);
 }
+
+int ft_strcmp(char *s1, char *s2)
+{
+    int i = 0;
+    while (s1[i] == s2[i] && s1[i] && s2[i])
+        i++;
+    return (s1[i] - s2[i]);
+}
+
