@@ -6,12 +6,16 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 17:10:09 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:16:22 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/03 17:04:57 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
+/// @brief reading user input and checking for variables that need to get expanded
+/// @param str user input
+/// @param env 
+/// @return new line with expanded variables
 char	*unquoted_var_expansion(char *str, char **env)
 {
     int	i;
@@ -37,7 +41,7 @@ char	*unquoted_var_expansion(char *str, char **env)
                 || (str[i + len] >= 'a' && str[i + len] <= 'z')
                 || (str[i + len] == '_')))
                 len++;
-            str = expand_unquoted_var_at(str, start, len, env);
+            str = expand_one(str, start, len, env);
             i = 0;
         }
         else
@@ -45,29 +49,13 @@ char	*unquoted_var_expansion(char *str, char **env)
     }
     return (str);
 }
-//This function may be useless, need further testing
-char	*expand_unquoted_var_at(char *str, int start, int len, char **env)
-{
-    char	*expanded;
-    char	*prefix;
-    char	*suffix;
-    char	*tmp;
 
-    expanded = expand_one(str, start, len, env);
-    prefix = ft_substr(str, 0, start);
-    suffix = ft_strdup(str + start + len);
-    printf("---expand_unquoted_var_at---\nExpanded: %s\nPrefix: %s\nSuffix: %s\n", expanded, prefix, suffix);
-    //tmp = ft_strjoin(prefix, expanded);
-    //free(prefix);
-    //free(expanded);
-    //free(str);
-    //expanded = ft_strjoin(tmp, suffix);
-    //free(tmp);
-    //free(suffix);
-    printf("expand_unquoted_var_at Expanded: %s\n", expanded);
-    return (expanded);
-}
-//key function to expand outside of quote
+/// @brief main function to expand outside of quote
+/// @param str 
+/// @param start 
+/// @param len 
+/// @param env 
+/// @return 
 static char	*expand_one(const char *str, int start, int len, char **env)
 {
     char	**cmd;
@@ -96,6 +84,10 @@ static char	*expand_one(const char *str, int start, int len, char **env)
     return (res);
 }
 
+/// @brief expanding variables
+/// @param str 
+/// @param env 
+/// @return 
 char	*expand_variable(char *str, char **env)
 {
     int		start;
@@ -112,7 +104,11 @@ char	*expand_variable(char *str, char **env)
     }
     return (str);
 }
-
+/// @brief finding next varibale to expand
+/// @param str 
+/// @param start 
+/// @param len 
+/// @return 
 static int	find_next_expand(const char *str, int *start, int *len)
 {
     int	i;

@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/30 10:57:23 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/03 18:48:57 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,21 @@ ASTNode *create_ast_node(int type, char *value)
 
 void add_ast_child(ASTNode *parent, ASTNode *child)
 {
+    ASTNode **new_children;
+    int i;
+
     if (!parent || !child)
         return;
-    parent->child_count++;
-    parent->children = realloc(parent->children, sizeof(ASTNode *) * parent->child_count);
-    if (!parent->children)
+    new_children = malloc(sizeof(ASTNode *) * (parent->child_count + 1));
+    if (!new_children)
         return;
-    parent->children[parent->child_count - 1] = child;
-    child->parent = parent; // Set parent pointer
+    for (i = 0; i < parent->child_count; i++)
+        new_children[i] = parent->children[i];
+    new_children[parent->child_count] = child;
+    free(parent->children);
+    parent->children = new_children;
+    parent->child_count++;
+    child->parent = parent;
 }
 
 static char	*ft_strjoin_slash(char const *s1, char const *s2)
@@ -187,7 +194,8 @@ ASTNode	*parse_command(t_token **lst_ptr, char **env)
             lst = lst->next;
             while (lst && define_type(lst->value, env) != NODE_PIPE)
             {
-                if (define_type(lst->value, env) == NODE_ARGUMENT && define_type(lst->prev->value, env) != NODE_REDIRECTION)
+                // Only treat as argument if not a redirection
+                if (define_type(lst->value, env) != NODE_REDIRECTION && define_type(lst->prev->value, env) != NODE_REDIRECTION)
                     add_ast_child(cmd, create_ast_node(NODE_ARGUMENT, lst->value));
                 lst = lst->next;
             }

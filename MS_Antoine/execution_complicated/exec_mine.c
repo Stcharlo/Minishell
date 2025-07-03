@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   exec_mine.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/02 17:57:59 by antoine          ###   ########.fr       */
+/*   Updated: 2025/07/03 13:56:48 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-static void	apply_output_redirections(ASTNode *node)
+static void	apply_output_redirections(ASTNode *node, char **tab, char **env)
 {
     int		count;
     int		i;
@@ -20,12 +20,16 @@ static void	apply_output_redirections(ASTNode *node)
 
     count = 0;
     i = 0;
+    // Count output redirections (including chained .left)
     while (i < node->child_count)
     {
         redir = node->children[i];
-        if (redir->type == NODE_REDIRECTION &&
-            (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
+        while (redir && redir->type == NODE_REDIRECTION &&
+               (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
+        {
             count++;
+            redir = redir->left;
+        }
         i++;
     }
     if (count == 0)
@@ -66,37 +70,59 @@ static void	apply_output_redirections(ASTNode *node)
         }
         if (pid == 0)
         {
-            /* Child process: run tee to duplicate output to all targets */
+            // Child: run the command, output to pipe
+            close(pipefd[0]);
+            dup2(pipefd[1], STDOUT_FILENO);
             close(pipefd[1]);
-            {
-                char	**targets;
-                int		j;
-
-                targets = malloc(sizeof(char *) * (count + 1));
-                if (!targets)
-                {
-                    perror("malloc");
-                    exit(1);
-                }
-                j = 0;
-                i = 0;
-                while (i < node->child_count)
-                {
-                    redir = node->children[i];
-                    if (redir->type == NODE_REDIRECTION &&
-                        (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
-                        targets[j++] = redir->target->value;
-                    i++;
-                }
-                targets[j] = NULL;
-                ft_tee(targets, count);
-            }
-            exit(0);
+            execve(get_cmd_path(tab[0], env), tab, env);
+            perror("execve");
+            exit(1);
         }
-        /* Parent: redirect STDOUT to tee pipe */
-        close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[1]);
+        else
+        {
+            // Parent: run tee, reading from pipe
+            close(pipefd[1]);
+            char	**targets;
+            int	*append_flags;
+            int	j;
+
+            targets = malloc(sizeof(char *) * (count + 1));
+            append_flags = malloc(sizeof(int) * count);
+            if (!targets || !append_flags)
+            {
+                perror("malloc");
+                exit(1);
+            }
+            j = 0;
+            i = 0;
+            while (i < node->child_count)
+            {
+                redir = node->children[i];
+                // Traverse all chained redirections
+                while (redir && redir->type == NODE_REDIRECTION &&
+                       (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
+                {
+                    targets[j] = redir->target->value;
+                    append_flags[j] = !ft_strcmp(redir->value, ">>");
+                    j++;
+                    redir = redir->left;
+                }
+                i++;
+            }
+            targets[j] = NULL;
+            // Temporarily redirect STDIN to pipe read end for ft_tee
+            int saved_stdin = dup(STDIN_FILENO);
+            dup2(pipefd[0], STDIN_FILENO);
+            close(pipefd[0]);
+            ft_tee(targets, append_flags, count);
+            dup2(saved_stdin, STDIN_FILENO);
+            close(saved_stdin);
+            free(targets);
+            free(append_flags);
+            waitpid(pid, NULL, 0);
+        }
+        // Prevent parent from running execve again
+        exit(0);
     }
 }
 
@@ -119,12 +145,8 @@ void	exec_cmd(ASTNode *node, char **env)
 		i++;
 	}
 	tab[argc] = 0;
-	/*if (tab[0])
-		printf("%s\n", tab[0]);
-	if (tab[1])
-		printf("%s\n", tab[1]);*/
 	//apply_redirections(node, tab, env);
-	apply_output_redirections(node);
+	apply_output_redirections(node, tab, env);
 	execve(get_cmd_path(tab[0], env), tab, env);
     perror("execve");
 	exit(1);

@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/30 14:45:48 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/03 18:46:31 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int check_type(char *str)
         return(APPEND);
     else if (contains_meta_character(str))
         return(INVALID);
-    else
+    else    
         return (WORD);
     // Make the difference between command and args ? Need to check access_ok => command otherwise just args   
 }
@@ -101,7 +101,9 @@ void separate_tokens(char *str)
         }
     }
 }
-
+/// @brief keeps on reading user input, add_history of input, checks for cmds such as clear and exit and calls process_tokens
+/// @param lst chained list for the tokenisation
+/// @param env 
 void	infinite_read(t_token **lst , char **env)
 {
     char	*line;
@@ -127,7 +129,9 @@ void	infinite_read(t_token **lst , char **env)
         process_tokens(lst, line, env);
     }
 }
-
+/// @brief reads a complete line of the user input and checks if there are open quotes once quotes are closed it sends the user input
+/// @param  
+/// @return unparsed input from the user
 static char	*get_input(void)
 {
     char	*line;
@@ -142,7 +146,10 @@ static char	*get_input(void)
     }
     return (line);
 }
-
+/// @brief parsing user input
+/// @param lst list for the tokens
+/// @param line input from the user
+/// @param env 
 static void	process_tokens(t_token **lst ,char *line, char **env)
 {
     ASTNode **nodes;
@@ -164,7 +171,11 @@ static void	process_tokens(t_token **lst ,char *line, char **env)
     execute_nodes(nodes, env);
     free_stack(lst);
 }
-
+/// @brief main function calling infinite read
+/// @param argc 
+/// @param argv 
+/// @param env 
+/// @return 
 int	main(int argc, char **argv, char **env)
 {
     (void)argc;

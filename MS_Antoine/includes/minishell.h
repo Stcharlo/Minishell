@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/02 18:10:29 by antoine          ###   ########.fr       */
+/*   Updated: 2025/07/03 18:46:42 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,11 +141,11 @@ void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
 int						create_list(t_token **start, char **str);
 t_token					*ft_lstnew(char *str);
 
-int						recognize_builtin(t_token **lst, char **env);
-void					pwd_recognition(t_token **lst, char **envp);
-void					env_recognition(t_token **lst, char **envp);
-void					echo_recognition(t_token **lst, char **envp);
-void					cd_recognition(t_token **lst, char **envp);
+void				recognize_builtin(t_token **lst, char **env);
+void				pwd_recognition(t_token **lst, char **envp);
+void				env_recognition(t_token **lst, char **envp);
+void				echo_recognition(t_token **lst, char **envp);
+void				cd_recognition(t_token **lst, char **envp);
 
 void					execute_nodes(ASTNode **head, char **env);
 
@@ -160,12 +160,11 @@ void					exec_pipe_node(ASTNode *node, char **env, int input_fd,
 void					exec_ast(ASTNode *node, char **env, int input_fd,
 							int output_fd);
 void					exec_cmd(ASTNode *node, char **env);
-void					apply_redirections(ASTNode *node, char **tab, char **en);
+void					apply_redirections(ASTNode *node, char **en);
 
 //tee
-int     count_trunc_append(ASTNode *node);
-static int	*open_targets(ASTNode *node);
+static int	*open_targets(char **targets, int *append_flags, int count);
 static void	cleanup(int *fds, int num_files, char *buffer);
 static void	write_loop(int *fds, int num_files, char *buffer);
-void	ft_tee(char **targets, int count);
+void	ft_tee(char **targets, int *append_flags, int count);
 #endif
