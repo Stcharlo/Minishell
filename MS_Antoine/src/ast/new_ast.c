@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 18:48:57 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 15:15:38 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,54 +71,60 @@ static char	*ft_strjoin_slash(char const *s1, char const *s2)
 
 char	*get_cmd_path(const char *cmd, char **env)
 {
-    char	*path_var;
-    char	**paths;
-    char	*full_path;
-    int		i;
+	char	*path_var;
+	char	**paths;
+	char	*full_path;
+	int		i;
 
-    if (strchr(cmd, '/'))
-        return (strdup(cmd));
-    path_var = NULL;
-    while (*env)
-    {
-        if (strncmp(*env, "PATH=", 5) == 0)
-        {
-            path_var = *env + 5;
-            break;
-        }
-        env++;
-    }
-    if (!path_var)
-        return (NULL);
-    paths = ft_split(path_var, ":");
-    if (!paths)
-        return (NULL);
-    i = 0;
-    while (paths[i])
-    {
-        full_path = ft_strjoin_slash(paths[i], cmd);
-        if (access(full_path, X_OK) == 0)
-        {
-            free(paths);
-            return (full_path);
-        }
-        free(full_path);
-        i++;
-    }
-    free(paths);
-    return (NULL);
+	if (strchr(cmd, '/'))
+		return (strdup(cmd));
+	path_var = NULL;
+	while (*env)
+	{
+		if (strncmp(*env, "PATH=", 5) == 0)
+		{
+			path_var = *env + 5;
+			break;
+		}
+		env++;
+	}
+	if (!path_var)
+		return (NULL);
+	paths = ft_split(path_var, ":");
+	if (!paths)
+		return (NULL);
+	i = 0;
+	while (paths[i])
+	{
+		full_path = ft_strjoin_slash(paths[i], cmd);
+		if (access(full_path, X_OK) == 0)
+		{
+			free_split(paths);
+			return (full_path);
+		}
+		free(full_path);
+		i++;
+	}
+	free_split(paths);
+	return (NULL);
 }
 
 
 int define_type(char *str, char **env)
 {
-    if (get_cmd_path(str, env))
-        return (NODE_COMMAND);
-    if (!strcmp(str, "<<") || !strcmp(str, "<") || !strcmp(str, ">>") || !strcmp(str, ">"))
-        return (NODE_REDIRECTION);
-    if (!strcmp(str,"|"))
-        return (NODE_PIPE);
-    return (NODE_ARGUMENT);
+	char *cmd_path;
+
+	cmd_path = get_cmd_path(str, env);
+	if (cmd_path)
+	{
+		free(cmd_path);
+		return (NODE_COMMAND);
+	}
+	if (!strcmp(str, "<<") || !strcmp(str, "<") || !strcmp(str, ">>") || !strcmp(str, ">"))
+		return (NODE_REDIRECTION);
+	if (!strcmp(str,"|"))
+		return (NODE_PIPE);
+	return (NODE_ARGUMENT);
 }
 
 void ast_free(ASTNode *node) {
@@ -127,6 +133,8 @@ void ast_free(ASTNode *node) {
     for (int i = 0; i < node->child_count; i++) {
         ast_free(node->children[i]);
     }
+    if (node->target)
+        ast_free(node->target);
     free(node->children);
     free(node);
 }
@@ -153,36 +161,25 @@ void set_redirection_target(ASTNode *redir, ASTNode *target)
     redir->target = target;
 }
 
-ASTNode *collect_redir(t_token **lst_ptr, char **env)
+static ASTNode	*create_redir_node(t_token **lst, char **env)
 {
-    t_token *lst = *lst_ptr;
-    ASTNode *redir_head = NULL;
-    ASTNode *redir_tail = NULL;
+    ASTNode	*redir;
+    ASTNode	*target;
 
-    while (lst && define_type(lst->value, env) != NODE_PIPE)
-    {
-        if (define_type(lst->value, env) == NODE_REDIRECTION)
-        {
-            ASTNode *redir = create_ast_node(NODE_REDIRECTION, lst->value);
-            lst = lst->next;
-            if (lst)
-                set_redirection_target(redir, create_ast_node(NODE_TARGET, lst->value));
-            if (!redir_head)
-                redir_head = redir;
-            else
-                redir_tail->left = redir;
-            redir_tail = redir;
-        }
-        lst = lst->next;
-    }
-    *lst_ptr = lst;
-    return redir_head;
+    redir = create_ast_node(NODE_REDIRECTION, (*lst)->value);
+    *lst = (*lst)->next;
+    target = NULL;
+    if (*lst)
+        target = create_ast_node(NODE_TARGET, (*lst)->value);
+    set_redirection_target(redir, target);
+    return (redir);
 }
-ASTNode	*parse_command(t_token **lst_ptr, char **env)
+
+// Remove left chaining, add all redirs as children
+ASTNode *parse_command(t_token **lst_ptr, char **env)
 {
-    t_token	*lst;
-    ASTNode	*cmd;
-    ASTNode *redir;
+    t_token *lst;
+    ASTNode *cmd;
 
     lst = *lst_ptr;
     cmd = NULL;
@@ -194,19 +191,28 @@ ASTNode	*parse_command(t_token **lst_ptr, char **env)
             lst = lst->next;
             while (lst && define_type(lst->value, env) != NODE_PIPE)
             {
-                // Only treat as argument if not a redirection
-                if (define_type(lst->value, env) != NODE_REDIRECTION && define_type(lst->prev->value, env) != NODE_REDIRECTION)
+                if (define_type(lst->value, env) == NODE_REDIRECTION)
+                {
+                    ASTNode *redir = create_redir_node(&lst, env);
+                    add_ast_child(cmd, redir);
+                }
+                else if (define_type(lst->value, env) != NODE_REDIRECTION &&
+                         define_type(lst->prev->value, env) != NODE_REDIRECTION)
+                {
                     add_ast_child(cmd, create_ast_node(NODE_ARGUMENT, lst->value));
-                lst = lst->next;
+                    lst = lst->next;
+                }
+                else
+                {
+                    lst = lst->next;
+                }
             }
             break;
         }
         lst = lst->next;
     }
-    redir = collect_redir(lst_ptr, env);
-    if (redir)
-        add_ast_child(cmd, redir);
-    return (cmd);
+    *lst_ptr = lst;
+    return cmd;
 }
 
 ASTNode	*parse_pipeline(t_token **lst_ptr, char **env)
@@ -308,18 +314,22 @@ void	ast_print(ASTNode *node, int indent)
     }
 }
 
-void print_head_nodes(ASTNode **head) {
-    if (head && *head) {
-        printf("head[0]:\n");
-        ast_print(*head, 1);
-    } else {
-        printf("head is empty\n");
-    }
+void	free_split(char **split)
+{
+	int i = 0;
+	if (!split)
+		return;
+	while (split[i])
+	{
+		free(split[i]);
+		i++;
+	}
+	free(split);
 }
 
 ASTNode 	**build_and_print_ast(t_token *lst, char **env)
 {
-    ASTNode	**root;
+    ASTNode  **root;
 
     root = malloc(sizeof(ASTNode *));
     *root = parse_pipeline(&lst, env);

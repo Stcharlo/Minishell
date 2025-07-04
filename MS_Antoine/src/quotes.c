@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:46:39 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 16:58:38 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 12:32:48 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,6 @@ int	open_quotes(const char *str)
 			d++;
 		i++;
 	}
-	printf("s: %d, d: %d, i: %d\n", s, d, i);
 	return (s % 2 != 0 || d % 2 != 0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 18:46:31 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 13:30:33 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,8 @@ static char	*get_input(void)
 static void	process_tokens(t_token **lst ,char *line, char **env)
 {
     ASTNode **nodes;
-    char	**cmd;
-    int		i;
+    char    **cmd;
+    int     i;
 
     line = unquoted_var_expansion(line, env);
     line = clean_line(line, env);
@@ -169,6 +169,10 @@ static void	process_tokens(t_token **lst ,char *line, char **env)
     nodes = build_and_print_ast(*lst, env);
     recognize_builtin(lst, env);
     execute_nodes(nodes, env);
+    if (nodes && *nodes)
+        ast_free(*nodes);
+    free(nodes);
+    free_split(cmd);
     free_stack(lst);
 }
 /// @brief main function calling infinite read

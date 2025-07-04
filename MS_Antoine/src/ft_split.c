@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/06/19 16:16:19 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 13:20:36 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ static int	split_word(char **psplit, const char *s, const char *delim,
     return (1);
 }
 
-char	**ft_split(const char *s, const char *delim)
+char	**ft_split(char *s, const char *delim)
 {
 	char	**psplit;
 	int		count;
@@ -119,6 +119,7 @@ char	**ft_split(const char *s, const char *delim)
 		return (NULL);
 	if (split_word(psplit, s, delim, 0) == -1)
 		return (NULL);
+    
 	return (psplit);
 }
 

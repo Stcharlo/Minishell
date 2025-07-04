@@ -6,22 +6,33 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 19:18:55 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 14:15:38 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-/// @brief finding last output redirection that needs to be applied
-/// @param node 
-/// @return 
-static ASTNode	*find_last_output_redir(ASTNode *node)
+static int	open_output_redir(ASTNode *redir)
 {
-	ASTNode	*redir;
-	ASTNode	*last;
-	int		i;
+	int fd;
 
-	last = NULL;
+	if (!ft_strcmp(redir->value, ">"))
+		fd = open(redir->target->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else
+		fd = open(redir->target->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd < 0)
+	{
+		perror(redir->target->value);
+		exit(1);
+	}
+	return (fd);
+}
+
+static void	process_output_redirs(ASTNode *node, int *fd)
+{
+	ASTNode *redir;
+	int i;
+
 	i = 0;
 	while (i < node->child_count)
 	{
@@ -29,43 +40,59 @@ static ASTNode	*find_last_output_redir(ASTNode *node)
 		while (redir && redir->type == NODE_REDIRECTION &&
 			   (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
 		{
-			last = redir;
+			if (*fd != -1)
+				close(*fd);
+			*fd = open_output_redir(redir);
 			redir = redir->left;
 		}
 		i++;
 	}
-	return (last);
 }
-/// @brief checking if node contains an output redirection and applying it to STDOUT
-/// @param node 
+
 static void	apply_output_redirections(ASTNode *node)
 {
-	ASTNode	*last;
-	int		fd;
+	int fd = -1;
+	int i;
+	ASTNode *child;
 
-	last = find_last_output_redir(node);
-	if (!last)
-		return ;
-	if (!ft_strcmp(last->value, ">"))
-		fd = open(last->target->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else
-		fd = open(last->target->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
-	if (fd < 0)
+	for (i = 0; i < node->child_count; i++)
 	{
-		perror(last->target->value);
-		exit(1);
+		child = node->children[i];
+		if (child->type == NODE_REDIRECTION &&
+		   (!ft_strcmp(child->value, ">") || !ft_strcmp(child->value, ">>")))
+		{
+			if (fd != -1)
+				close(fd);
+			fd = open_output_redir(child);
+		}
 	}
-	dup2(fd, STDOUT_FILENO);
-	close(fd);
+	if (fd != -1)
+	{
+		dup2(fd, STDOUT_FILENO);
+		close(fd);
+	}
 }
 
 /// @brief checking if node contains an input redirection and applying it to STDIN
 /// @param node 
-static void	apply_input_redirections(ASTNode *node)
+static int	open_input_redir(ASTNode *redir)
 {
-	ASTNode	*redir;
-	int		fd;
-	int		i;
+	int fd;
+
+	fd = open(redir->target->value, O_RDONLY);
+	if (fd < 0)
+	{
+		perror("open");
+		exit(1);
+	}
+	return (fd);
+}
+
+static void	process_input_redirs(ASTNode *node)
+{
+	ASTNode *redir;
+	int fd;
+	int i;
 
 	i = 0;
 	while (i < node->child_count)
@@ -75,18 +102,31 @@ static void	apply_input_redirections(ASTNode *node)
 		{
 			if (!strcmp(redir->value, "<"))
 			{
-				fd = open(redir->target->value, O_RDONLY);
-				if (fd < 0)
-				{
-					perror("open");
-					exit(1);
-				}
+				fd = open_input_redir(redir);
 				dup2(fd, STDIN_FILENO);
 				close(fd);
 			}
 			redir = redir->left;
 		}
 		i++;
+	}
+}
+
+static void	apply_input_redirections(ASTNode *node)
+{
+	int i;
+	ASTNode *child;
+	int fd;
+
+	for (i = 0; i < node->child_count; i++)
+	{
+		child = node->children[i];
+		if (child->type == NODE_REDIRECTION && !strcmp(child->value, "<"))
+		{
+			fd = open_input_redir(child);
+			dup2(fd, STDIN_FILENO);
+			close(fd);
+		}
 	}
 }
 
