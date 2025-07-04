@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 18:46:42 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/03 16:46:32 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 
 # define BUILTIN "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
+# define REDIRECTION "<:>:>>:<<"
 
 # define INVALID 0
 # define COMMAND 1
@@ -55,9 +56,16 @@ typedef struct s_token
 	struct s_token		*prev;
 }						t_token;
 
+typedef struct s_env
+{
+	char **env;
+	char **export;
+}	t_env;
+
+
 typedef struct s_ast	ASTNode;
 
-struct					s_ast
+typedef struct					s_ast
 {
 	int					type;
 	char *value; // e.g. "echo", ">", "|", etc.
@@ -75,7 +83,8 @@ struct					s_ast
 
 	// Optionally:
 	ASTNode *parent; // Pointer to parent node (can be NULL for root)
-};
+	t_env *env;
+} t_ast;
 
 // ast
 ASTNode					*create_ast_node(int type, char *value);
@@ -141,11 +150,6 @@ void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
 int						create_list(t_token **start, char **str);
 t_token					*ft_lstnew(char *str);
 
-void				recognize_builtin(t_token **lst, char **env);
-void				pwd_recognition(t_token **lst, char **envp);
-void				env_recognition(t_token **lst, char **envp);
-void				echo_recognition(t_token **lst, char **envp);
-void				cd_recognition(t_token **lst, char **envp);
 
 void					execute_nodes(ASTNode **head, char **env);
 
@@ -160,11 +164,36 @@ void					exec_pipe_node(ASTNode *node, char **env, int input_fd,
 void					exec_ast(ASTNode *node, char **env, int input_fd,
 							int output_fd);
 void					exec_cmd(ASTNode *node, char **env);
-void					apply_redirections(ASTNode *node, char **en);
+void					apply_redirections(ASTNode *node, char **tab, char **en);
+
+
+// Pour les test
+void				recognize_builtin(char **argv, char **env);
+void				pwd_recognition(char **argv, t_ast **env);
+void				env_recognition(char **argv, t_ast **env);
+void				echo_recognition(char **argv, t_ast **env);
+void				cd_recognition(char **argv, int i);
+void 				Build_in(char **argv, int i, t_ast **env);
+void 				export_recognition(char **argv, int i, t_ast **env);
+void				add_export(char **argv, int s, t_ast **env);
+void				show_env(t_ast **env);
+void				unset_env(char **argv, int i, t_ast **env);
+void				unset_recognition(char **argv, int i, t_ast **env);
+void 				show_export(t_ast **env);
+char				*cat_dup(char *s1);
+int					parse_exp(char *argv);
+int					check_dbl_equal(char *argv);
+int					skip_isspace(char *argv);
+void				add_env(char **argv, int s, t_ast **env);
+int					ft_strncmp(const char *s1, const char *s2, size_t n);
+void				unset_exp(char **argv, int i, t_ast **env);
+void				Redirection(char **argv, int i, t_env **env);
+void				output_recognition(char **argv, int i);
 
 //tee
-static int	*open_targets(char **targets, int *append_flags, int count);
+int     count_trunc_append(ASTNode *node);
+static int	*open_targets(ASTNode *node);
 static void	cleanup(int *fds, int num_files, char *buffer);
 static void	write_loop(int *fds, int num_files, char *buffer);
-void	ft_tee(char **targets, int *append_flags, int count);
+void	ft_tee(char **targets, int count);
 #endif
