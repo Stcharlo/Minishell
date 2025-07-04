@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 13:30:33 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:23:12 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void separate_tokens(char *str)
 /// @brief keeps on reading user input, add_history of input, checks for cmds such as clear and exit and calls process_tokens
 /// @param lst chained list for the tokenisation
 /// @param env 
-void	infinite_read(t_token **lst , char **env)
+void	infinite_read(t_token **lst , t_ast **env)
 {
     char	*line;
 
@@ -150,7 +150,7 @@ static char	*get_input(void)
 /// @param lst list for the tokens
 /// @param line input from the user
 /// @param env 
-static void	process_tokens(t_token **lst ,char *line, char **env)
+static void	process_tokens(t_token **lst ,char *line, t_ast **env)
 {
     ASTNode **nodes;
     char    **cmd;
@@ -167,7 +167,6 @@ static void	process_tokens(t_token **lst ,char *line, char **env)
     }
     create_list(lst, cmd);
     nodes = build_and_print_ast(*lst, env);
-    recognize_builtin(lst, env);
     execute_nodes(nodes, env);
     if (nodes && *nodes)
         ast_free(*nodes);
@@ -187,11 +186,17 @@ int	main(int argc, char **argv, char **env)
     
     t_token *list;
     t_token **lst;
+    t_ast **AST;
+    t_ast *ASt;
     char *line;
 
+    ASt = NULL;
+    AST = &ASt;
     list = NULL;
     lst = &list;
-    infinite_read(lst, env);
+    initialise_env(AST, env);
+    initialise_exp(AST, env);
+    infinite_read(lst, AST);
     show_list(list);
     return (0);
 }

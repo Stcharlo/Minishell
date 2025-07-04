@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 17:10:09 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 17:04:57 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:05:06 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 /// @param str user input
 /// @param env 
 /// @return new line with expanded variables
-char	*unquoted_var_expansion(char *str, char **env)
+char	*unquoted_var_expansion(char *str, t_ast **env)
 {
     int	i;
     int	start;
@@ -56,7 +56,7 @@ char	*unquoted_var_expansion(char *str, char **env)
 /// @param len 
 /// @param env 
 /// @return 
-static char	*expand_one(const char *str, int start, int len, char **env)
+static char	*expand_one(const char *str, int start, int len, t_ast **env)
 {
     char	**cmd;
     char	*var;
@@ -88,7 +88,7 @@ static char	*expand_one(const char *str, int start, int len, char **env)
 /// @param str 
 /// @param env 
 /// @return 
-char	*expand_variable(char *str, char **env)
+char	*expand_variable(char *str, t_ast **env)
 {
     int		start;
     int		len;

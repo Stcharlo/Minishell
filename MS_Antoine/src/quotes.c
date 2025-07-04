@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:46:39 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 12:32:48 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:03:18 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,21 @@
 /// @param n 
 /// @param env 
 /// @return value of variable
-char	*get_value(char *var, int n, char **env)
+char	*get_value(char *var, int n, t_ast **env)
 {
 	int	i;
+	t_ast *current;
 
+	current = *env;
 	i = 0;
-	while (env[i])
+	while (current->env->env[i])
 	{
-		if (!strncmp(env[i], var, n) && env[i][n] == '=')
-			return (printf("return (get_value: %s\n", env[i] + n + 1), env[i]
+		if (!strncmp(current->env->env[i], var, n) && current->env->env[i][n] == '=')
+			return (printf("return (get_value: %s\n", current->env->env[i] + n + 1), current->env->env[i]
 				+ n + 1);
 		i++;
 	}
-	if (!env[i])
+	if (!current->env->env[i])
 		return (NULL);
 	return (NULL);
 }
@@ -40,7 +42,7 @@ char	*get_value(char *var, int n, char **env)
 /// @param end
 /// @param env
 /// @return new clean string
-char	*double_quotes(char *str, int start, int end, char **env)
+char	*double_quotes(char *str, int start, int end, t_ast **env)
 {
 	char	*res;
 	int		index_str;
@@ -105,7 +107,7 @@ char	*single_quotes(char *str, int start, int end)
 /// @param str
 /// @param env
 /// @return
-char	*clean_line(char *str, char **env)
+char	*clean_line(char *str, t_ast **env)
 {
 	int	i;
 	int	start;

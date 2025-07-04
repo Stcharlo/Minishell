@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/02 18:08:59 by antoine          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:24:08 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,18 @@ char	*ft_strdup(const char *s1)
 	}
 	dst[i] = 0;
 	return (dst);
+}
+
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
+{
+	size_t		i;
+
+	i = 8;
+	while (s1[i] == s2[i] && s1[i] && s2[i] && i < n)
+		i++;
+	if (i == n)
+		return (0);
+	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 }
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
@@ -115,7 +127,6 @@ char	*ft_strjoin_buffer(char const *s1, char const *s2, char buffer)
 	return (str);
 }
 
-
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*str;
@@ -178,6 +189,29 @@ char	*ft_strchr(const char *s, int c)
 	}
 	if (!un_c)
 		return ((char *)(s + i));
+	return (0);
+}
+
+int		ft_strnstr(char *big, char *little)
+{
+	size_t	i;
+	size_t	j;
+
+	i = 0;
+	j = 0;
+	if (*little == '\0')
+		return (0);
+	while (big[i])
+	{
+		j = 0;
+		while (big[i + j] == little[j])
+		{
+			j++;
+			if (little[j] == ':' || little[j] == '\0')
+				return (1);
+		}
+		i++;
+	}
 	return (0);
 }
 

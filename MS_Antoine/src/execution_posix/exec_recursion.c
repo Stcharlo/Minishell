@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   exec_recursion.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/03 17:13:01 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:05:35 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-void exec_pipe_right(ASTNode *node, char **env, int output_fd, int *fd)
+void exec_pipe_right(ASTNode *node, t_ast **env, int output_fd, int *fd)
 {
     if (fd[0] != STDIN_FILENO)
     {
@@ -26,7 +26,7 @@ void exec_pipe_right(ASTNode *node, char **env, int output_fd, int *fd)
     exit(0);
 }
 
-void exec_pipe_left(ASTNode *node, char **env, int input_fd, int *fd)
+void exec_pipe_left(ASTNode *node, t_ast **env, int input_fd, int *fd)
 {
     if (input_fd != STDIN_FILENO)
     {
@@ -43,7 +43,7 @@ void exec_pipe_left(ASTNode *node, char **env, int input_fd, int *fd)
     exit(0);
 }
 
-void exec_command_node(ASTNode *node, char **env, int input_fd, int output_fd)
+void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 {
     pid_t pid = fork();
     if (pid == 0)
@@ -69,7 +69,7 @@ void exec_command_node(ASTNode *node, char **env, int input_fd, int output_fd)
 /// @param env 
 /// @param input_fd 
 /// @param output_fd 
-void exec_pipe_node(ASTNode *node, char **env, int input_fd, int output_fd)
+void exec_pipe_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 {
     int fd[2];
     pid_t left_pid;
@@ -95,7 +95,7 @@ void exec_pipe_node(ASTNode *node, char **env, int input_fd, int output_fd)
 /// @param env 
 /// @param input_fd our current input fd
 /// @param output_fd our current output fd
-void exec_ast(ASTNode *node, char **env, int input_fd, int output_fd)
+void exec_ast(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 {
     if (!node)
         return;

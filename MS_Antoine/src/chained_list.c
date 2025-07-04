@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   chained_list.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 18:24:00 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/06/27 14:05:21 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:16:23 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,28 +96,6 @@ void	free_stack(t_token **stack)
 	*stack = NULL;
 }
 
-int		ft_strnstr(char *big, char *little)
-{
-	size_t	i;
-	size_t	j;
-
-	i = 0;
-	j = 0;
-	if (*little == '\0')
-		return (0);
-	while (big[i])
-	{
-		j = 0;
-		while (big[i + j] == little[j])
-		{
-			j++;
-			if (little[j] == ':' || little[j] == '\0')
-				return (1);
-		}
-		i++;
-	}
-	return (0);
-}
 void	show_list(t_token *list)
 {
 	while(list)

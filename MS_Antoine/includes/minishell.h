@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 13:31:32 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:48:21 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,16 @@ typedef struct s_token
 	struct s_token		*prev;
 }						t_token;
 
+typedef struct s_env
+{
+	char **env;
+	char **export;
+}	t_env;
+
+
 typedef struct s_ast	ASTNode;
 
-struct					s_ast
+typedef struct					s_ast
 {
 	int					type;
 	char *value; // e.g. "echo", ">", "|", etc.
@@ -75,25 +82,25 @@ struct					s_ast
 
 	// Optionally:
 	ASTNode *parent; // Pointer to parent node (can be NULL for root)
-};
+	t_env*env;
+} t_ast;
 
 // ast
-ASTNode					*create_ast_node(int type, char *value);
-void					add_ast_child(ASTNode *parent, ASTNode *child);
-static char				*ft_strjoin_slash(char const *s1, char const *s2);
-char					*get_cmd_path(const char *cmd, char **env);
-int						define_type(char *str, char **env);
-void					ast_print(ASTNode *node, int indent);
-void					count_commands(t_token *lst, char **env,
-							int *count_heads);
-void					ast_free(ASTNode *node);
-static void				fill_ast_nodes(ASTNode **head, t_token *lst,
-							char **env);
-static void				chain_ast_nodes(ASTNode **head, int total);
-void					push_node_on_top(ASTNode **head, int a);
-void					rotate_nodes(ASTNode **head, int a, int b);
-void					reorder_ast_nodes(ASTNode **head, int total);
-ASTNode					**build_and_print_ast(t_token *lst, char **env);
+ASTNode *create_ast_node(int type, char *value);
+void add_ast_child(ASTNode *parent, ASTNode *child);
+char *get_cmd_path(const char *cmd, t_ast **env);
+int define_type(char *str, t_ast **env);
+void ast_print(ASTNode *node, int indent);
+void ast_free(ASTNode *node);
+void set_ast_left(ASTNode *parent, ASTNode *child);
+void set_ast_right(ASTNode *parent, ASTNode *child);
+void add_redirection(ASTNode *cmd, ASTNode *redir);
+void set_redirection_target(ASTNode *redir, ASTNode *target);
+ASTNode *parse_command(t_token **lst_ptr, t_ast **env);
+ASTNode *parse_pipeline(t_token **lst_ptr, t_ast **env);
+ASTNode **combine(ASTNode **head, ASTNode *cmd, char *value);
+void free_split(char **split);
+ASTNode **build_and_print_ast(t_token *lst, t_ast **env);
 
 char					**ft_split( char *s, const char *delim);
 char					*ft_strdup(const char *s1);
@@ -108,7 +115,7 @@ size_t					ft_strlcpy(char *dst, const char *src, size_t dstsize);
 
 char					*readline_open_quotes(char *str);
 int						open_quotes(const char *str);
-char					*clean_line(char *str, char **env);
+char					*clean_line(char *str, t_ast **env);
 char					**ft_split_once_range(const char *s, char sep,
 							int start, int end);
 char					**ft_split_dollar_range(const char *s, int start,
@@ -120,18 +127,18 @@ void					*ft_calloc(size_t nmemb, size_t size);
 char					*ft_strjoin(char const *s1, char const *s2);
 char					*ft_strchr(const char *s, int c);
 
-static void				process_tokens(t_token **lst, char *line, char **env);
+static void				process_tokens(t_token **lst, char *line, t_ast **env);
 static char				*get_input(void);
-void					infinite_read(t_token **lst, char **env);
-char					*get_value(char *var, int n, char **env);
+void					infinite_read(t_token **lst, t_ast **env);
+char					*get_value(char *var, int n, t_ast **env);
 
-char					*unquoted_var_expansion(char *str, char **env);
+char					*unquoted_var_expansion(char *str, t_ast **env);
 char					*expand_unquoted_var_at(char *str, int start, int len,
-							char **env);
-char					*expand_variable(char *str, char **env);
+							t_ast **env);
+char					*expand_variable(char *str, t_ast **env);
 static int				find_next_expand(const char *str, int *start, int *len);
 static char				*expand_one(const char *str, int start, int len,
-							char **env);
+							t_ast **env);
 
 int						ft_strnstr(char *big, char *little);
 void					show_list(t_token *list);
@@ -141,26 +148,46 @@ void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
 int						create_list(t_token **start, char **str);
 t_token					*ft_lstnew(char *str);
 
-void				recognize_builtin(t_token **lst, char **env);
-void				pwd_recognition(t_token **lst, char **envp);
-void				env_recognition(t_token **lst, char **envp);
-void				echo_recognition(t_token **lst, char **envp);
-void				cd_recognition(t_token **lst, char **envp);
 
-void					execute_nodes(ASTNode **head, char **env);
+void					execute_nodes(ASTNode **head, t_ast **env);
 
-void					exec_pipe_right(ASTNode *node, char **env,
+void					exec_pipe_right(ASTNode *node, t_ast **env,
 							int output_fd, int *fd);
-void					exec_pipe_left(ASTNode *node, char **env, int input_fd,
+void					exec_pipe_left(ASTNode *node, t_ast **env, int input_fd,
 							int *fd);
-void					exec_command_node(ASTNode *node, char **env,
+void					exec_command_node(ASTNode *node, t_ast **env,
 							int input_fd, int output_fd);
-void					exec_pipe_node(ASTNode *node, char **env, int input_fd,
+void					exec_pipe_node(ASTNode *node, t_ast **env, int input_fd,
 							int output_fd);
-void					exec_ast(ASTNode *node, char **env, int input_fd,
+void					exec_ast(ASTNode *node, t_ast **env, int input_fd,
 							int output_fd);
-void					exec_cmd(ASTNode *node, char **env);
-void					apply_redirections(ASTNode *node, char **en);
+void					exec_cmd(ASTNode *node, t_ast **env);
+void					apply_redirections(ASTNode *node, t_ast **env);
+
+// Pour les test
+void				pwd_recognition(t_ast **env);
+void				env_recognition(t_ast **env);
+void				echo_recognition(t_token **lst, t_ast **env);
+void				cd_recognition(char **argv, int i);
+void 				Build_in(char **argv, int i, t_ast **env);
+void 				export_recognition(char **argv, int i, t_ast **env);
+void				add_export(char **argv, int s, t_ast **env);
+void				show_env(t_ast **env);
+void				unset_env(char **argv, int i, t_ast **env);
+void				unset_recognition(char **argv, int i, t_ast **env);
+void 				show_export(t_ast **env);
+char				*cat_dup(char *s1);
+int					parse_exp(char *argv);
+int					check_dbl_equal(char *argv);
+int					skip_isspace(char *argv);
+void				add_env(char **argv, int s, t_ast **env);
+int					ft_strncmp(const char *s1, const char *s2, size_t n);
+void				unset_exp(char **argv, int i, t_ast **env);
+void				Redirection(char **argv, int i, t_env **env);
+void				output_recognition(char **argv, int i);
+void initialise_env(t_ast **env ,char **envp);
+void initialise_exp(t_ast **env, char **envp);
+int  cmd(char **tab, t_ast **env);
 
 //tee
 static int	*open_targets(char **targets, int *append_flags, int count);

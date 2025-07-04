@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   new_ast.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 15:15:38 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:12:19 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,24 +69,27 @@ static char	*ft_strjoin_slash(char const *s1, char const *s2)
     return (res);
 }
 
-char	*get_cmd_path(const char *cmd, char **env)
+char	*get_cmd_path(const char *cmd, t_ast **env)
 {
 	char	*path_var;
 	char	**paths;
 	char	*full_path;
 	int		i;
-
+    t_ast   *current;
+    
+    current = *env;
 	if (strchr(cmd, '/'))
 		return (strdup(cmd));
 	path_var = NULL;
-	while (*env)
+    i = 0;
+	while (current->env->env[i])
 	{
-		if (strncmp(*env, "PATH=", 5) == 0)
+		if (strncmp(current->env->env[i], "PATH=", 5) == 0)
 		{
-			path_var = *env + 5;
+			path_var = current->env->env[i] + 5;
 			break;
 		}
-		env++;
+		i++;
 	}
 	if (!path_var)
 		return (NULL);
@@ -110,7 +113,7 @@ char	*get_cmd_path(const char *cmd, char **env)
 }
 
 
-int define_type(char *str, char **env)
+int define_type(char *str, t_ast **env)
 {
 	char *cmd_path;
 
@@ -161,7 +164,7 @@ void set_redirection_target(ASTNode *redir, ASTNode *target)
     redir->target = target;
 }
 
-static ASTNode	*create_redir_node(t_token **lst, char **env)
+static ASTNode	*create_redir_node(t_token **lst, t_ast **env)
 {
     ASTNode	*redir;
     ASTNode	*target;
@@ -176,7 +179,7 @@ static ASTNode	*create_redir_node(t_token **lst, char **env)
 }
 
 // Remove left chaining, add all redirs as children
-ASTNode *parse_command(t_token **lst_ptr, char **env)
+ASTNode *parse_command(t_token **lst_ptr, t_ast **env)
 {
     t_token *lst;
     ASTNode *cmd;
@@ -215,7 +218,7 @@ ASTNode *parse_command(t_token **lst_ptr, char **env)
     return cmd;
 }
 
-ASTNode	*parse_pipeline(t_token **lst_ptr, char **env)
+ASTNode	*parse_pipeline(t_token **lst_ptr, t_ast **env)
 {
     ASTNode	*left;
     ASTNode	*pipe;
@@ -327,7 +330,7 @@ void	free_split(char **split)
 	free(split);
 }
 
-ASTNode 	**build_and_print_ast(t_token *lst, char **env)
+ASTNode 	**build_and_print_ast(t_token *lst, t_ast **env)
 {
     ASTNode  **root;
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_mine.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 14:15:38 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/04 16:52:27 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ static void	apply_input_redirections(ASTNode *node)
 /// @brief calling the redirection functions
 /// @param node Tree with the cmd
 /// @param env 
-void	apply_redirections(ASTNode *node, char **env)
+void	apply_redirections(ASTNode *node, t_ast **env)
 {
 	apply_input_redirections(node);
 	apply_output_redirections(node);
@@ -142,7 +142,7 @@ void	apply_redirections(ASTNode *node, char **env)
 /// @brief executes the command with execve, redirections are made just before
 /// @param node 
 /// @param env 
-void	exec_cmd(ASTNode *node, char **env)
+void	exec_cmd(ASTNode *node, t_ast **env)
 {
 	int		i;
 	int		argc;
@@ -162,14 +162,18 @@ void	exec_cmd(ASTNode *node, char **env)
 	}
 	tab[argc] = 0;
 	apply_redirections(node, env);
-	execve(get_cmd_path(tab[0], env), tab, env);
-	perror("execve");
+	if (cmd(tab, env))
+	{
+		printf("EXECVE IS RUNNING\n");
+		execve(get_cmd_path(tab[0], env), tab, (*env)->env->env);
+		perror("execve");
+	}
 	exit(1);
 }
 /// @brief main function that will take the ast node and take care of the execution
 /// @param head ASTNode containing the tree
 /// @param env 
-void	execute_nodes(ASTNode **head, char **env)
+void	execute_nodes(ASTNode **head, t_ast **env)
 {
     if (!head || !(*head))
         return;
