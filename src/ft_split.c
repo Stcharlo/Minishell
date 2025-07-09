@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 13:20:36 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/08 13:45:23 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,6 @@ char	**ft_split_once_range(const char *s, char sep, int start, int end)
 {
     char	**res;
     int		i;
-    int		len;
 
     if (!s || start < 0 || end < start)
         return (NULL);

@@ -1,36 +1,45 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cmd2.c                                             :+:      :+:    :+:   */
+/*   heredoc_utlis.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/03 15:45:54 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/08 14:15:30 by agaroux          ###   ########.fr       */
+/*   Created: 2025/07/07 16:08:43 by agaroux           #+#    #+#             */
+/*   Updated: 2025/07/07 16:37:45 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-void redirection(char **argv, int i)
+void	free_tab(char **tab)
 {
-    if (ft_strnstr(BUILTIN, argv[i]))
-	{
-		if (ft_strnstr("<<", argv[i]))
-		if (ft_strnstr(">>", argv[i]))
-		if (ft_strnstr(">", argv[i]))
-            output_recognition(argv, i);
-		if (ft_strnstr("<", argv[i]))
+	int	i;
+
+	if (!tab)
 		return ;
+	i = 0;
+	while (tab[i])
+	{
+		free(tab[i]);
+		tab[i] = NULL;
+		i++;
 	}
-	return ;
+	free(tab);
 }
-void    output_recognition(char **argv, int i)
+
+int	ft_newline(const char *str)
 {
-    int outfile_fd;
-    
-    i++;
-    outfile_fd = open(argv[i], O_RDONLY);
-    if (dup2(outfile_fd, STDOUT_FILENO) == -1)
-        return ;
+	size_t	i;
+
+	if (!str)
+		return (0);
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '\n')
+			return (1);
+		i++;
+	}
+	return (0);
 }

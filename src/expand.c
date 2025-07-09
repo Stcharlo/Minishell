@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 17:10:09 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 16:05:06 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/08 15:44:14 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ char	*unquoted_var_expansion(char *str, t_ast **env)
 /// @param len 
 /// @param env 
 /// @return 
-static char	*expand_one(const char *str, int start, int len, t_ast **env)
+char	*expand_one(const char *str, int start, int len, t_ast **env)
 {
     char	**cmd;
     char	*var;
@@ -69,11 +69,8 @@ static char	*expand_one(const char *str, int start, int len, t_ast **env)
     if (!val)
         val = "";
     res = ft_strjoin(cmd[0], val);
-    printf("---expand_one---\nstart: %d\nlen: %d\ncmd[0]: %s\ncmd[1]: %s\ncmd[2]: %s\n,var: %s\nval: %s\n", start, len, cmd[0], cmd[1], cmd[2], var, val);
-    printf("expand_one res: %s\n", res);
     if (cmd[2])
         res = ft_strjoin(res, cmd[2]);
-    printf("expand_one res: %s\n", res);
     free(var);
     free(cmd[0]);
     if (cmd[1])
@@ -109,7 +106,7 @@ char	*expand_variable(char *str, t_ast **env)
 /// @param start 
 /// @param len 
 /// @return 
-static int	find_next_expand(const char *str, int *start, int *len)
+int	find_next_expand(const char *str, int *start, int *len)
 {
     int	i;
     int	j;

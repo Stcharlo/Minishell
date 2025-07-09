@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec_mine.c                                        :+:      :+:    :+:   */
+/*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 17:24:33 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/09 14:05:58 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,34 +28,15 @@ static int	open_output_redir(ASTNode *redir)
 	return (fd);
 }
 
-static void	process_output_redirs(ASTNode *node, int *fd)
-{
-	ASTNode *redir;
-	int i;
-
-	i = 0;
-	while (i < node->child_count)
-	{
-		redir = node->children[i];
-		while (redir && redir->type == NODE_REDIRECTION &&
-			   (!ft_strcmp(redir->value, ">") || !ft_strcmp(redir->value, ">>")))
-		{
-			if (*fd != -1)
-				close(*fd);
-			*fd = open_output_redir(redir);
-			redir = redir->left;
-		}
-		i++;
-	}
-}
-
 static void	apply_output_redirections(ASTNode *node)
 {
-	int fd = -1;
+	int fd;
 	int i;
 	ASTNode *child;
 
-	for (i = 0; i < node->child_count; i++)
+	i = 0;
+	fd = -1;
+	while (i < node->child_count)
 	{
 		child = node->children[i];
 		if (child->type == NODE_REDIRECTION &&
@@ -65,6 +46,7 @@ static void	apply_output_redirections(ASTNode *node)
 				close(fd);
 			fd = open_output_redir(child);
 		}
+		i++;
 	}
 	if (fd != -1)
 	{
@@ -88,52 +70,30 @@ static int	open_input_redir(ASTNode *redir)
 	return (fd);
 }
 
-static void	process_input_redirs(ASTNode *node)
-{
-	ASTNode *redir;
-	int fd;
-	int i;
-
-	i = 0;
-	while (i < node->child_count)
-	{
-		redir = node->children[i];
-		while (redir && redir->type == NODE_REDIRECTION)
-		{
-			if (!strcmp(redir->value, "<"))
-			{
-				fd = open_input_redir(redir);
-				dup2(fd, STDIN_FILENO);
-				close(fd);
-			}
-			redir = redir->left;
-		}
-		i++;
-	}
-}
-
 static void	apply_input_redirections(ASTNode *node)
 {
 	int i;
 	ASTNode *child;
 	int fd;
 
-	for (i = 0; i < node->child_count; i++)
+	i = 0;
+	while (i < node->child_count)
 	{
 		child = node->children[i];
-		if (child->type == NODE_REDIRECTION && !strcmp(child->value, "<"))
+		if (child->type == NODE_REDIRECTION && (!strcmp(child->value, "<") || !strcmp(child->value, "<<")))
 		{
 			fd = open_input_redir(child);
 			dup2(fd, STDIN_FILENO);
 			close(fd);
 		}
+		i++;
 	}
 }
 
 /// @brief calling the redirection functions
 /// @param node Tree with the cmd
 /// @param env 
-void	apply_redirections(ASTNode *node, t_ast **env)
+void	apply_redirections(ASTNode *node)
 {
 	apply_input_redirections(node);
 	apply_output_redirections(node);
@@ -142,7 +102,7 @@ void	apply_redirections(ASTNode *node, t_ast **env)
 /// @brief executes the command with execve, redirections are made just before
 /// @param node 
 /// @param env 
-void	exec_cmd(ASTNode *node, t_ast **env)
+void	exec_cmd(ASTNode *node, t_ast **env, int child)
 {
 	int		i;
 	int		argc;
@@ -161,13 +121,14 @@ void	exec_cmd(ASTNode *node, t_ast **env)
 		i++;
 	}
 	tab[argc] = 0;
-	apply_redirections(node, env);
+	apply_redirections(node);
 	if (cmd(tab, env))
 	{
 		execve(get_cmd_path(tab[0], env), tab, (*env)->env->env);
 		perror("execve");
 	}
-	exit(1);
+	if (child == 1)
+		exit(1);
 }
 /// @brief main function that will take the ast node and take care of the execution
 /// @param head ASTNode containing the tree

@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   exec_recursion.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 16:05:35 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/09 14:06:11 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+
+extern int g_exit_code;
 
 void exec_pipe_right(ASTNode *node, t_ast **env, int output_fd, int *fd)
 {
@@ -45,23 +47,38 @@ void exec_pipe_left(ASTNode *node, t_ast **env, int input_fd, int *fd)
 
 void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 {
-    pid_t pid = fork();
-    if (pid == 0)
+    int status;
+    pid_t pid;
+
+    if (!cmd_recognize(node->value))
+        exec_cmd(node, env, 0);
+    else
     {
-        if (input_fd != STDIN_FILENO)
+        if ((pid = fork()) < 0)
+            return;
+        if (pid == 0)
         {
-            dup2(input_fd, STDIN_FILENO);
-            close(input_fd);
+            if (input_fd != STDIN_FILENO)
+            {
+                dup2(input_fd, STDIN_FILENO);
+                close(input_fd);
+            }
+            if (output_fd != STDOUT_FILENO)
+            {
+                dup2(output_fd, STDOUT_FILENO);
+                close(output_fd);
+            }
+            exec_cmd(node, env, 1);
+            exit(0);
         }
-        if (output_fd != STDOUT_FILENO)
+        else
         {
-            dup2(output_fd, STDOUT_FILENO);
-            close(output_fd);
+            waitpid(pid, &status, 0);
+            if (WIFEXITED(status))
+                g_exit_code = WEXITSTATUS(status);
         }
-        exec_cmd(node, env);
-        exit(0);
     }
-    waitpid(pid, NULL, 0);
+    return;
 }
 
 /// @brief the function will pipe and fork before calling the functions to exec the left and right side of the node
@@ -72,6 +89,7 @@ void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 void exec_pipe_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 {
     int fd[2];
+    int status;
     pid_t left_pid;
     pid_t right_pid;
 
@@ -87,8 +105,8 @@ void exec_pipe_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
         exec_pipe_left(node, env, input_fd, fd);
     close(fd[0]);
     close(fd[1]);
-    waitpid(left_pid, NULL, 0);
-    waitpid(right_pid, NULL, 0);
+    waitpid(left_pid, &status, 0);
+    waitpid(right_pid, &status, 0);
 }
 /// @brief recursive function that will check if the node is a pipe or a command
 /// @param node 

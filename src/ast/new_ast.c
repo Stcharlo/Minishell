@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   new_ast.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/04 17:21:07 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/08 15:06:13 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,58 +164,69 @@ void set_redirection_target(ASTNode *redir, ASTNode *target)
     redir->target = target;
 }
 
-static ASTNode	*create_redir_node(t_token **lst, t_ast **env)
-{
-    ASTNode	*redir;
-    ASTNode	*target;
-
-    redir = create_ast_node(NODE_REDIRECTION, (*lst)->value);
-    *lst = (*lst)->next;
-    target = NULL;
-    if (*lst)
-        target = create_ast_node(NODE_TARGET, (*lst)->value);
-    set_redirection_target(redir, target);
-    return (redir);
-}
-
 // Remove left chaining, add all redirs as children
 ASTNode *parse_command(t_token **lst_ptr, t_ast **env)
 {
-    t_token *lst;
-    ASTNode *comd;
+    t_token *lst = *lst_ptr;
+    ASTNode *cmd = NULL;
 
-    lst = *lst_ptr;
-    comd = NULL;
+    // 1. Find the command
     while (lst && define_type(lst->value, env) != NODE_PIPE)
     {
-        if (lst && (define_type(lst->value, env) == NODE_COMMAND || !cmd_recognize(lst->value, env)))
+        if (define_type(lst->value, env) != NODE_REDIRECTION)
         {
-            comd = create_ast_node(NODE_COMMAND, lst->value);
+            cmd = create_ast_node(NODE_COMMAND, lst->value);
             lst = lst->next;
-            while (lst && define_type(lst->value, env) != NODE_PIPE)
-            {
-                if (define_type(lst->value, env) == NODE_REDIRECTION)
-                {
-                    ASTNode *redir = create_redir_node(&lst, env);
-                    add_ast_child(comd, redir);
-                }
-                else if (define_type(lst->value, env) != NODE_REDIRECTION &&
-                         define_type(lst->prev->value, env) != NODE_REDIRECTION)
-                {
-                    add_ast_child(comd, create_ast_node(NODE_ARGUMENT, lst->value));
-                    lst = lst->next;
-                }
-                else
-                {
-                    lst = lst->next;
-                }
-            }
             break;
         }
+        // Skip redirection and its target
         lst = lst->next;
+        if (lst)
+            lst = lst->next;
     }
+
+    // 2. Add arguments (skip redirections and pipes)
+    while (lst && define_type(lst->value, env) != NODE_PIPE)
+    {
+        if (define_type(lst->value, env) != NODE_REDIRECTION)
+        {
+            add_ast_child(cmd, create_ast_node(NODE_ARGUMENT, lst->value));
+            lst = lst->next;
+        }
+        else
+        {
+            // Skip redirection and its target
+            lst = lst->next;
+            if (lst)
+                lst = lst->next;
+        }
+    }
+
     *lst_ptr = lst;
-    return comd;
+    return cmd;
+}
+
+void attach_redirections(ASTNode *cmd, t_token *lst, t_ast **env)
+{
+    t_token *cur = lst;
+    while (cur && define_type(cur->value, env) != NODE_PIPE)
+    {
+        if (define_type(cur->value, env) == NODE_REDIRECTION)
+        {
+            t_token *redir_token = cur;
+            ASTNode *redir_node = create_ast_node(NODE_REDIRECTION, redir_token->value);
+
+            // Move to target token
+            cur = cur->next;
+            ASTNode *target_node = NULL;
+            if (cur && define_type(cur->value, env) != NODE_PIPE && define_type(cur->value, env) != NODE_REDIRECTION)
+                target_node = create_ast_node(NODE_TARGET, cur->value);
+
+            set_redirection_target(redir_node, target_node);
+            add_ast_child(cmd, redir_node);
+        }
+        cur = cur->next;
+    }
 }
 
 ASTNode	*parse_pipeline(t_token **lst_ptr, t_ast **env)
@@ -223,15 +234,16 @@ ASTNode	*parse_pipeline(t_token **lst_ptr, t_ast **env)
     ASTNode	*left;
     ASTNode	*pipe;
     ASTNode	*right;
-    t_token	*lst;
+    t_token	*lst = *lst_ptr; // Save the original pointer
 
-    left = parse_command(lst_ptr, env);
-    lst = *lst_ptr;
-    if (lst && define_type(lst->value, env) == NODE_PIPE)
+    left = parse_command(lst_ptr, env); // advances lst_ptr
+    attach_redirections(left, lst, env); // use the original pointer!
+    t_token *cur = *lst_ptr;
+    if (cur && define_type(cur->value, env) == NODE_PIPE)
     {
-        pipe = create_ast_node(NODE_PIPE, lst->value);
+        pipe = create_ast_node(NODE_PIPE, cur->value);
         set_ast_left(pipe, left);
-        *lst_ptr = lst->next;
+        *lst_ptr = cur->next;
         right = parse_pipeline(lst_ptr, env);
         set_ast_right(pipe, right);
         return (pipe);
@@ -239,7 +251,7 @@ ASTNode	*parse_pipeline(t_token **lst_ptr, t_ast **env)
     return (left);
 }
 
-ASTNode  **combine (ASTNode **head, ASTNode *cmd, char *value)
+ASTNode  **combine (ASTNode **head, ASTNode *cmd)
 {
     ASTNode **new_head;
     
@@ -336,7 +348,7 @@ ASTNode 	**build_and_print_ast(t_token *lst, t_ast **env)
 
     root = malloc(sizeof(ASTNode *));
     *root = parse_pipeline(&lst, env);
-    if (*root)
-        ast_print(*root, 0);
+    //if (*root)
+    //    ast_print(*root, 0);
     return (root);
 }

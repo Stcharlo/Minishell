@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd1.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/04 17:24:51 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/09 14:14:04 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,6 @@ void export_recognition(char **argv, int i, t_ast **env)
 {
     t_ast *current;
     int j;
-    char **temp;
     
     j = 0;
     current = *env;
@@ -344,7 +343,7 @@ int cmd(char **tab, t_ast **env)
     // }
     return (1);
 }
-int cmd_recognize(char *tab, t_ast **env)
+int cmd_recognize(char *tab)
 {
     int i;
     
@@ -389,7 +388,6 @@ void initialise_exp(t_ast **env, char **envp)
 {
     t_ast *current;
     int i;
-    char *temp;
     
     i = 0;
     if (!envp)
@@ -411,23 +409,3 @@ char  *cat_dup(char *s1)
 {
    return ft_strjoin("export ", s1);
 }
-
-// int main (int argc, char **argv, char **envp)
-// {
-//     t_env *list;
-//     t_env **lst;
-//     t_ast *AST;
-//     t_ast **ASt;
-    
-//     AST = NULL;
-//     ASt = &AST;
-//     list = NULL;
-//     lst = &list;
-//     if (argc < 2)
-//         return (0);
-//     initialise_env(ASt, envp);
-//     initialise_exp(ASt, envp);
-//     // show_export(lst);
-//     cmd(argv, ASt, envp);
-//     return (0);
-// }
