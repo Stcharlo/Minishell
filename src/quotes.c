@@ -6,11 +6,13 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 18:28:27 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/07 18:28:28 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/09 17:37:43 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+extern int g_exit_code;
 
 /// @brief checking for the variable in the environment
 /// @param var 
@@ -24,11 +26,12 @@ char	*get_value(char *var, int n, t_ast **env)
 
 	current = *env;
 	i = 0;
+	if (!strcmp(var, "?"))
+		return (ft_itoa(g_exit_code));
 	while (current->env->env[i])
 	{
 		if (!strncmp(current->env->env[i], var, n) && current->env->env[i][n] == '=')
-			return (printf("return (get_value: %s\n", current->env->env[i] + n + 1), current->env->env[i]
-				+ n + 1);
+			return (current->env->env[i] + n + 1);
 		i++;
 	}
 	if (!current->env->env[i])

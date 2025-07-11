@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 16:28:31 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/09 15:37:04 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 {
 	size_t		i;
 
-	i = 0;
+	i = 8;
 	while (s1[i] == s2[i] && s1[i] && s2[i] && i < n)
 		i++;
 	if (i == n)
@@ -85,7 +85,6 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 		i++;
 	}
 	result[i] = 0;
-	printf("Substr: %s\n", result);
 	return (result);
 }
 

@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/08 17:14:18 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/11 17:40:19 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ void separate_tokens(char *str)
         }
     }
 }
+
 /// @brief keeps on reading user input, add_history of input, checks for cmds such as clear and exit and calls process_tokens
 /// @param lst chained list for the tokenisation
 /// @param env 
@@ -123,6 +124,7 @@ void	infinite_read(t_token **lst , t_ast **env)
         process_tokens(lst, line, env);
     }
 }
+
 /// @brief reads a complete line of the user input and checks if there are open quotes once quotes are closed it sends the user input
 /// @param  
 /// @return unparsed input from the user
@@ -154,6 +156,70 @@ void unlink_redirection(t_token **lst)
     }
 }
 
+void exit_status(t_token **lst)
+{
+    t_token *tmp;
+    char *exit_str;
+
+    tmp = *lst;
+    exit_str = ft_itoa(g_exit_code);
+    while (tmp)
+    {
+        if (!ft_strcmp(tmp->value, "$?"))
+        {
+            free(tmp->value);
+            tmp->value = ft_strdup(exit_str);
+        }
+        tmp = tmp->next;
+    }
+    free(exit_str);
+}
+
+char *txt_detection(const char *line)
+{
+    int i;
+    int j;
+    int len;
+
+    if (!line)
+        return NULL;
+    len = strlen(line);
+    char *res = malloc(len + 1);
+    if (!res)
+        return NULL;
+
+    for (i = 0; i < len; i++)
+        res[i] = 'a';
+    res[len] = 0;
+
+    i = 0;
+    j = 0;
+    while (i+j < len)
+    {
+        if (line[i+j] == '\'')
+        {
+            j++; // opening single quote
+            while (i+j < len && line[i+j] != '\'')
+                res[i++] = 'o'; // inside single quotes
+            if (i < len)
+                j++; // closing single quote
+        }
+        else if (line[i+j] == '\"')
+        {
+            j++; // opening double quote
+            while (i+j < len && line[i+j] != '\"')
+                res[i++] = 'o'; // inside double quotes
+            if (i < len)
+                j++; // closing double quote
+        }
+        else
+        {
+            i++;
+        }
+    }
+    return res;
+}
+
 /// @brief parsing user input
 /// @param lst list for the tokens
 /// @param line input from the user
@@ -162,11 +228,17 @@ void	process_tokens(t_token **lst ,char *line, t_ast **env)
 {
     ASTNode **nodes;
     char    **cmd;
+    char    **cmd_index;
+    char    *txt;
 
     line = unquoted_var_expansion(line, env);
+    txt = txt_detection(line);
     line = clean_line(line, env);
     cmd = ft_split(line, "\t\n|&;()<>");
-    create_list(lst, cmd);
+    cmd_index = ft_split_index(line, "\t\n|&;()<>", txt);
+    create_list(lst, cmd, cmd_index);
+    show_list(*lst);
+    exit_status(lst);
     check_heredoc(lst);
     nodes = build_and_print_ast(*lst, env);
     execute_nodes(nodes, env);
@@ -200,6 +272,6 @@ int	main(int argc, char **argv, char **env)
     initialise_env(AST, env);
     initialise_exp(AST, env);
     infinite_read(lst, AST);
-    //show_list(list);
+    rl_clear_history();
     return (g_exit_code);
 }

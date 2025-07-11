@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/09 14:06:11 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/11 15:27:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,10 @@ void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
         {
             waitpid(pid, &status, 0);
             if (WIFEXITED(status))
+            {
                 g_exit_code = WEXITSTATUS(status);
+                (*env)->env->last_pid = pid;
+            }
         }
     }
     return;

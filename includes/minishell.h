@@ -3,21 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 16:08:47 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/11 15:24:58 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+# define _POSIX_C_SOURCE 200809L
+
 # include <ctype.h>
 # include <dirent.h>
 # include <fcntl.h>
 # include <readline/history.h>
 # include <readline/readline.h>
+# include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -28,6 +31,7 @@
 
 # define BUILTIN "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
+# define REDIRECTION "|:<:>:<<:>>"
 
 # define BUFFER_SIZE 1024
 # define INVALID 0
@@ -48,6 +52,7 @@
 
 # define LEFT 0
 # define RIGHT 1
+
 typedef struct s_token
 {
 	char				*value;
@@ -60,6 +65,7 @@ typedef struct s_env
 {
 	char				**env;
 	char				**export;
+	pid_t				last_pid;
 }						t_env;
 
 typedef struct s_ast	ASTNode;
@@ -127,8 +133,9 @@ void					*ft_calloc(size_t nmemb, size_t size);
 char					*ft_strjoin(char const *s1, char const *s2);
 char					*ft_strchr(const char *s, int c);
 
-void				process_tokens(t_token **lst, char *line, t_ast **env);
-char				*get_input(void);
+void					sigint_handler(int sig_num);
+void					process_tokens(t_token **lst, char *line, t_ast **env);
+char					*get_input(void);
 void					infinite_read(t_token **lst, t_ast **env);
 char					*get_value(char *var, int n, t_ast **env);
 
@@ -145,8 +152,9 @@ void					show_list(t_token *list);
 void					free_stack(t_token **stack);
 int						ft_lstsize(t_token *lst);
 void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
-int						create_list(t_token **start, char **str);
-t_token					*ft_lstnew(char *str);
+int						create_list(t_token **start, char **str,
+							char **str_index);
+t_token					*ft_lstnew(char *str, char *str_index);
 
 void					execute_nodes(ASTNode **head, t_ast **env);
 
@@ -167,10 +175,11 @@ void					apply_redirections(ASTNode *node);
 void					pwd_recognition(t_ast **env);
 void					env_recognition(t_ast **env);
 void					echo_recognition(char **argv, int i);
-void					cd_recognition(char **argv, int i, t_ast **env);
+void					cd_recognition(char **tab, int i, t_ast **env);
 void					Build_in(char **argv, int i, t_ast **env);
 void					export_recognition(char **argv, int i, t_ast **env);
 void					add_export(char *argv, t_ast **env);
+void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
 void					show_env(t_ast **env);
 void					unset_env(char *argv, t_ast **env);
 void					unset_recognition(char **argv, int i, t_ast **env);
@@ -189,7 +198,6 @@ void					initialise_exp(t_ast **env, char **envp);
 int						cmd(char **tab, t_ast **env);
 int						cmd_recognize(char *tab);
 void					free_split(char **split);
-void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
 
 // gnl
 char					*ft_strjoin(char const *s1, char const *s2);
@@ -205,5 +213,10 @@ void					clean_heredoc(char **argv);
 void					read_heredoc(char *limiter);
 void					free_tab(char **tab);
 void					check_heredoc(t_token **lst);
+char					*ft_itoa(int n);
+char					**ft_split_index(char *s, const char *delim,
+							char *s_index);
+int						split_word_index(char **psplit, const char *s,
+							const char *delim, char *s_index);
 
 #endif
