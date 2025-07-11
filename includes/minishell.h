@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/09 14:06:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/11 16:08:47 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,22 +166,22 @@ void					apply_redirections(ASTNode *node);
 // Pour les test
 void					pwd_recognition(t_ast **env);
 void					env_recognition(t_ast **env);
-void					echo_recognition(t_token **lst, t_ast **env);
-void					cd_recognition(char **argv, int i);
+void					echo_recognition(char **argv, int i);
+void					cd_recognition(char **argv, int i, t_ast **env);
 void					Build_in(char **argv, int i, t_ast **env);
 void					export_recognition(char **argv, int i, t_ast **env);
-void					add_export(char **argv, int s, t_ast **env);
+void					add_export(char *argv, t_ast **env);
 void					show_env(t_ast **env);
-void					unset_env(char **argv, int i, t_ast **env);
+void					unset_env(char *argv, t_ast **env);
 void					unset_recognition(char **argv, int i, t_ast **env);
 void					show_export(t_ast **env);
 char					*cat_dup(char *s1);
 int						parse_exp(char *argv);
 int						check_dbl_equal(char *argv);
 int						skip_isspace(char *argv);
-void					add_env(char **argv, int s, t_ast **env);
+void					add_env(char *argv, t_ast **env);
 int						ft_strncmp(const char *s1, const char *s2, size_t n);
-void					unset_exp(char **argv, int i, t_ast **env);
+void					unset_exp(char *argv, t_ast **env);
 void					redirection(char **argv, int i);
 void					output_recognition(char **argv, int i);
 void					initialise_env(t_ast **env, char **envp);
@@ -189,6 +189,7 @@ void					initialise_exp(t_ast **env, char **envp);
 int						cmd(char **tab, t_ast **env);
 int						cmd_recognize(char *tab);
 void					free_split(char **split);
+void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
 
 // gnl
 char					*ft_strjoin(char const *s1, char const *s2);
