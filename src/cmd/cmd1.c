@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd1.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/10 16:53:30 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/11 16:42:45 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,31 +35,27 @@ void Build_in(char **tab, int i, t_ast **env)
 
 void echo_recognition(char **argv, int i)
 {
-    int j;
     int count;
 
-    count = 0;
-    j = 0;
+    count = 1;
     i++;
-    if(!argv[i])
-        return ;
-    if  (ft_strcmp(argv[i] , "-n") == 1)
-        count = 1;
-    while(argv[i] && ft_strnstr(REDIRECTION, argv[i]) != 1)
+    if  (argv[i] && ft_strcmp(argv[i] , "-n") == 0)
     {
-        write(1, &argv[i][j], 1);
-        j++;
-        if (argv[i][j] == '\0' && argv[i + 1])
-        {
-            write (1, " ", 1);
-            j = 0;
-            i++;
-        }
+        count = 0;
+        i++;
     }
-    if (count == 1)
-        return ;
-    write(1, "\n", 1);
+    while(argv[i])
+    {
+        write(1, argv[i], strlen(argv[i]));
+        if (argv[i + 1])
+            write (1, " ", 1);
+        i++;
+    }
+    if (count)
+        write(1, "\n", 1);
+    return ;
 }
+
 void unset_recognition(char **argv, int i, t_ast **env)
 { 
     t_ast *current;
@@ -83,20 +79,23 @@ void unset_exp(char *argv, t_ast **env)
     char    **temp;
     int j;
     int count;
+    char *target;
 
     j = 0;
     count = 0;
     current = *env;
+    target = cat_dup(argv);
     while (current->env->export[count])
         count++;
     temp = malloc(sizeof(char *) * (count + 1));
     count = 0;
     while (current->env->export[j])
     {
-        if (ft_strncmp(current->env->export[j], argv, strlen(argv)))
-            j++;
-        temp[count] = current->env->export[j];
-        count++;
+        if (ft_strncmp(current->env->export[j], (target), strlen(target)) != 0)
+        {
+            temp[count] = current->env->export[j];
+            count++;
+        }
         j++;
     }
     temp[count] = NULL;
@@ -122,10 +121,11 @@ void unset_env(char *argv, t_ast **env)
     count = 0;
     while (current->env->env[j])
     {
-        if (!strncmp(current->env->env[j], argv, strlen(argv)))
-            j++;
-        temp[count] = current->env->env[j];
-        count++;
+        if (ft_strncmp(current->env->env[j], argv, strlen(argv)) != 0)
+        {
+            temp[count] = current->env->env[j];
+            count++;
+        }
         j++;
     }
     temp[count] = NULL;
@@ -300,13 +300,16 @@ void show_env(t_ast **env)
     return ;
 }
 
+
 void cd_recognition(char **tab, int i, t_ast **env)
 {
     char *buffer;
     char *oldpwd;
     char *pwd;
+    char *buffer2;
 
     buffer = malloc(1024);
+    buffer2 = malloc(1024);
     i++;
     if (access(tab[i], R_OK) != 0)
     {
@@ -314,14 +317,13 @@ void cd_recognition(char **tab, int i, t_ast **env)
         free(buffer);
         return ;
     }
-    oldpwd = getcwd(buffer, 1024);
+    oldpwd = getcwd(buffer2, 1024);
     if (chdir(tab[i]) != 0)
         return ;
     pwd = getcwd(buffer, 1024);
     pwd_change(pwd, oldpwd, env);
-    if (getcwd(buffer, 1024) != NULL)
-        printf("%s\n", buffer);
     free(buffer);
+    free(buffer2);
     return ;
 }
 
@@ -330,10 +332,10 @@ void pwd_change(char *pwd, char *oldpwd, t_ast **env)
     char *pw;
     char *oldpw;
 
-    unset_env("OLDPWD", env);
-    unset_exp("OLDPWD", env);
-    unset_env("PWD", env);
-    unset_exp("PWD", env);
+    unset_env("OLDPWD=", env);
+    unset_exp("OLDPWD=", env);
+    unset_env("PWD=", env);
+    unset_exp("PWD=", env);
     pw = ft_strjoin("PWD=", pwd);
     oldpw = ft_strjoin("OLDPWD=", oldpwd);
     add_env(pw, env);
@@ -346,7 +348,6 @@ void pwd_change(char *pwd, char *oldpwd, t_ast **env)
         free(oldpw);
     return ;
 }
-
 void env_recognition(t_ast **env)
 {
 	int i;
@@ -470,5 +471,5 @@ void initialise_exp(t_ast **env, char **envp)
 }
 char  *cat_dup(char *s1)
 {
-   return (ft_strjoin("export ", s1));
+   return ft_strjoin("export ", s1);
 }
