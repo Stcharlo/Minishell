@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 15:28:52 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/11 17:40:19 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,8 +269,6 @@ int	main(int argc, char **argv, char **env)
     AST = &ASt;
     list = NULL;
     lst = &list;
-    signal(SIGINT, sigint_handler);
-    signal(SIGQUIT, sigint_handler);
     initialise_env(AST, env);
     initialise_exp(AST, env);
     infinite_read(lst, AST);

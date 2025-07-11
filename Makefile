@@ -23,7 +23,6 @@ SRC = read.c quotes.c libft.c ft_split.c expand.c chained_list.c ft_itoa.c \
       execution_posix/exec.c execution_posix/exec_recursion.c \
       cmd/cmd1.c cmd/cmd2.c \
       ast/new_ast.c \
-	  signal/signal.c
 
 # Object files, with obj/ prefix and .o extension
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
