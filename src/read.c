@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 17:40:19 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/11 18:01:35 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,18 +19,18 @@ int check_type(char *str)
     if (!strcmp(str, "|"))
         return (PIPE);
     else if (!strcmp(str, "<"))
-        return(INPUT_REDIRECT);
+        return (INPUT_REDIRECT);
     else if (!strcmp(str, "<<"))
-        return(HEREDOC);
+        return (HEREDOC);
     else if (!strcmp(str, ">"))
-        return(OUTPUT_REDIRECT);
+        return (OUTPUT_REDIRECT);
     else if (!strcmp(str, ">>"))
-        return(APPEND);
+        return (APPEND);
     else if (contains_meta_character(str))
-        return(INVALID);
-    else    
+        return (INVALID);
+    else
         return (WORD);
-    // Make the difference between command and args ? Need to check access_ok => command otherwise just args   
+    // Make the difference between command and args ? Need to check access_ok => command otherwise just args
 }
 
 ASTNode *create_ast(int type, char *word)
@@ -74,7 +74,7 @@ void separate_tokens(char *str)
     int i;
     int count_letters;
     int b_meta;
-    
+
     i = 0;
     count_letters = 0;
     b_meta = 0;
@@ -82,7 +82,7 @@ void separate_tokens(char *str)
     {
         while (isspace(str[i]))
             i++;
-        while(is_meta_character(str[i]))
+        while (is_meta_character(str[i]))
         {
             b_meta = 1;
             count_letters++;
@@ -98,10 +98,10 @@ void separate_tokens(char *str)
 
 /// @brief keeps on reading user input, add_history of input, checks for cmds such as clear and exit and calls process_tokens
 /// @param lst chained list for the tokenisation
-/// @param env 
-void	infinite_read(t_token **lst , t_ast **env)
+/// @param env
+void infinite_read(t_token **lst, t_ast **env)
 {
-    char	*line;
+    char *line;
 
     while (1)
     {
@@ -109,29 +109,29 @@ void	infinite_read(t_token **lst , t_ast **env)
         if (!line)
             continue;
         if (line[0] == 0)
-            {
-                free(line);
-                continue;
-            }
+        {
+            free(line);
+            continue;
+        }
         add_history(line);
         if (!strcmp(line, "clear"))
             clear_history();
         if (!strcmp(line, "exit"))
         {
             free(line);
-            break ;
+            break;
         }
         process_tokens(lst, line, env);
     }
 }
 
 /// @brief reads a complete line of the user input and checks if there are open quotes once quotes are closed it sends the user input
-/// @param  
+/// @param
 /// @return unparsed input from the user
-char	*get_input(void)
+char *get_input(void)
 {
-    char	*line;
-    char    *tmp;
+    char *line;
+    char *tmp;
 
     line = readline("Minishell> ");
     while (open_quotes(line))
@@ -146,9 +146,9 @@ char	*get_input(void)
 void unlink_redirection(t_token **lst)
 {
     t_token *tmp;
-    
+
     tmp = *lst;
-    while(tmp)
+    while (tmp)
     {
         if (!ft_strcmp(tmp->value, "<<"))
             unlink(tmp->next->value);
@@ -194,20 +194,20 @@ char *txt_detection(const char *line)
 
     i = 0;
     j = 0;
-    while (i+j < len)
+    while (i + j < len)
     {
-        if (line[i+j] == '\'')
+        if (line[i + j] == '\'')
         {
             j++; // opening single quote
-            while (i+j < len && line[i+j] != '\'')
+            while (i + j < len && line[i + j] != '\'')
                 res[i++] = 'o'; // inside single quotes
             if (i < len)
                 j++; // closing single quote
         }
-        else if (line[i+j] == '\"')
+        else if (line[i + j] == '\"')
         {
             j++; // opening double quote
-            while (i+j < len && line[i+j] != '\"')
+            while (i + j < len && line[i + j] != '\"')
                 res[i++] = 'o'; // inside double quotes
             if (i < len)
                 j++; // closing double quote
@@ -223,13 +223,13 @@ char *txt_detection(const char *line)
 /// @brief parsing user input
 /// @param lst list for the tokens
 /// @param line input from the user
-/// @param env 
-void	process_tokens(t_token **lst ,char *line, t_ast **env)
+/// @param env
+void process_tokens(t_token **lst, char *line, t_ast **env)
 {
     ASTNode **nodes;
-    char    **cmd;
-    char    **cmd_index;
-    char    *txt;
+    char **cmd;
+    char **cmd_index;
+    char *txt;
 
     line = unquoted_var_expansion(line, env);
     txt = txt_detection(line);
@@ -251,20 +251,20 @@ void	process_tokens(t_token **lst ,char *line, t_ast **env)
 }
 
 /// @brief main function calling infinite read
-/// @param argc 
-/// @param argv 
-/// @param env 
-/// @return 
-int	main(int argc, char **argv, char **env)
+/// @param argc
+/// @param argv
+/// @param env
+/// @return
+int main(int argc, char **argv, char **env)
 {
     (void)argc;
     (void)argv;
-    
+
     t_token *list;
     t_token **lst;
     t_ast **AST;
     t_ast *ASt;
-    
+
     ASt = NULL;
     AST = &ASt;
     list = NULL;
