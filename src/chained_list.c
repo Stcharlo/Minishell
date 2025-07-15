@@ -6,21 +6,13 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 18:24:00 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/10 16:11:49 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/13 14:26:44 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	check_type_v2(char *str, char *str_index)
-{
-	if (str_index[0] == 'a')
-		return (check_type(str));
-	else
-		return (WORD);
-}
-
-t_token *ft_lstnew(char *str, char *str_index)
+t_token *ft_lstnew(char *str)
 {
     t_token *element;
 
@@ -28,13 +20,13 @@ t_token *ft_lstnew(char *str, char *str_index)
     if (!element)
         return (0);
     element->value = str;
-    element->type = check_type_v2(str, str_index);
+    element->type = check_type(str);
     element->next = NULL;
     element->prev = NULL;
     return (element);
 }
 
-int	create_list(t_token **start ,char **str, char **str_index)
+int	create_list(t_token **start ,char **str)
 {
 	t_token	*new;
     int     i;
@@ -42,7 +34,7 @@ int	create_list(t_token **start ,char **str, char **str_index)
     i = 0;
 	while (str[i])
 	{
-		new = ft_lstnew(str[i], str_index[i]);
+		new = ft_lstnew(str[i]);
 		if (!new)
 		{
 			free_stack(start);

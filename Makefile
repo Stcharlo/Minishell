@@ -18,11 +18,12 @@ CYAN = \033[0;96m
 YELLOW = \033[0;93m
 
 # Source files (all with correct relative paths and .c extensions)
-SRC = read.c quotes.c libft.c ft_split.c expand.c chained_list.c ft_itoa.c \
+SRC = read.c quotes.c libft.c ft_split.c expand.c chained_list.c ft_itoa.c bash_split.c \
       heredoc/get_next_line.c heredoc/heredoc.c heredoc/heredoc_utlis.c \
       execution_posix/exec.c execution_posix/exec_recursion.c \
       cmd/cmd1.c cmd/cmd2.c \
       ast/new_ast.c \
+	  signal/signal.c
 
 # Object files, with obj/ prefix and .o extension
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))

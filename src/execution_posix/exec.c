@@ -6,11 +6,13 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/10 17:19:09 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/15 13:45:28 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+
+extern int	g_exit_code;
 
 static int	open_output_redir(ASTNode *redir)
 {
@@ -99,6 +101,20 @@ void	apply_redirections(ASTNode *node)
 	apply_output_redirections(node);
 }
 
+int is_directory(const char *path)
+{
+    struct stat st;
+    if (stat(path, &st) == 0)
+        return S_ISDIR(st.st_mode);
+    return 0;
+}
+
+void exit_child(int exit_code, int child)
+{
+	if (child == CHILD)
+		exit(exit_code);
+}
+
 /// @brief executes the command with execve, redirections are made just before
 /// @param node 
 /// @param env 
@@ -107,6 +123,7 @@ void	exec_cmd(ASTNode *node, t_ast **env, int child)
 	int		i;
 	int		argc;
 	char	**tab;
+	char	*path;
 
 	if (!node)
 		return ;
@@ -122,20 +139,48 @@ void	exec_cmd(ASTNode *node, t_ast **env, int child)
 	}
 	tab[argc] = 0;
 	apply_redirections(node);
+	path = get_cmd_path(tab[0], env);
 	if (cmd(tab, env))
 	{
-		execve(get_cmd_path(tab[0], env), tab, (*env)->env->env);
-		perror("execve");
+		if (path == NULL || 0 > access(path, F_OK))
+		{
+			g_exit_code = 127; // Command not found
+			exit_child(g_exit_code, child);
+			return;
+		}
+		else if (is_directory(path) || access(path, X_OK) != 0) 
+		{
+    		g_exit_code = 126; // Permission denied
+			exit_child(g_exit_code, child);
+			return;
+		}
+		else if (execve(path, tab, (*env)->env->env) < 0)
+		{
+			g_exit_code = 1; // Command found but cannot execute
+			exit_child(g_exit_code, child);
+			return;
+		}
+		g_exit_code = 0;
+		exit_child(g_exit_code, child);
+		return;
 	}
-	if (child == 1)
-		exit(1);
+	
 }
 /// @brief main function that will take the ast node and take care of the execution
 /// @param head ASTNode containing the tree
 /// @param env 
 void	execute_nodes(ASTNode **head, t_ast **env)
 {
+	int saved_stdout;
+	int saved_stdin;
+	
     if (!head || !(*head))
         return;
+		saved_stdout = dup(STDOUT_FILENO);
+		saved_stdin = dup(STDIN_FILENO);
     exec_ast(*head, env, STDIN_FILENO, STDOUT_FILENO);
+	dup2(saved_stdout, STDOUT_FILENO);
+	dup2(saved_stdin, STDIN_FILENO);
+	close(saved_stdout);
+	close(saved_stdin);
 }

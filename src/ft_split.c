@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/10 19:43:20 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/13 14:07:27 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,38 @@ static int	split_word(char **psplit, const char *s, const char *delim,
     }
     psplit[word] = NULL;
     return (1);
+}
+
+static int is_delim(char c, const char *delims) {
+    while (*delims)
+        if (c == *delims++)
+            return 1;
+    return 0;
+}
+
+char **split_quote_aware(const char *s, const char *delims) {
+    char **result = malloc(sizeof(char*) * (strlen(s) + 2));
+    int i = 0, j = 0, k = 0, in_single = 0, in_double = 0;
+    char buf[4096];
+
+    while (s[i]) {
+        while (isspace(s[i]))
+            i++;
+        if (!s[i]) break;
+        k = 0;
+        in_single = in_double = 0;
+        while (s[i]) {
+            if (s[i] == '\'' && !in_double) in_single = !in_single, i++;
+            else if (s[i] == '"' && !in_single) in_double = !in_double, i++;
+            else if (!in_single && !in_double && is_delim(s[i], delims)) break;
+            else buf[k++] = s[i++];
+        }
+        buf[k] = 0;
+        result[j++] = strdup(buf);
+        if (s[i] && is_delim(s[i], delims)) i++;
+    }
+    result[j] = NULL;
+    return result;
 }
 
 char	**ft_split(char *s, const char *delim)

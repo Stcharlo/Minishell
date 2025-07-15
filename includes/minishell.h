@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 15:24:58 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/15 13:51:11 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # define _POSIX_C_SOURCE 200809L
+# define ECHOCTL 0001000
 
 # include <ctype.h>
 # include <dirent.h>
@@ -23,15 +24,21 @@
 # include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
+# include <errno.h>
 # include <stdlib.h>
 # include <string.h>
+# include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <termios.h>
 # include <unistd.h>
 
 # define BUILTIN "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
 # define REDIRECTION "|:<:>:<<:>>"
+
+# define PARENT 0
+# define CHILD 1
 
 # define BUFFER_SIZE 1024
 # define INVALID 0
@@ -152,9 +159,8 @@ void					show_list(t_token *list);
 void					free_stack(t_token **stack);
 int						ft_lstsize(t_token *lst);
 void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
-int						create_list(t_token **start, char **str,
-							char **str_index);
-t_token					*ft_lstnew(char *str, char *str_index);
+int						create_list(t_token **start, char **str);
+t_token					*ft_lstnew(char *str);
 
 void					execute_nodes(ASTNode **head, t_ast **env);
 
@@ -218,5 +224,9 @@ char					**ft_split_index(char *s, const char *delim,
 							char *s_index);
 int						split_word_index(char **psplit, const char *s,
 							const char *delim, char *s_index);
-
+void					setup_sigint_handler(void);
+void					setup_sigquit_handler(void);
+void					disable_echoctl(void);
+char					**split_quote_aware(const char *s, const char *delims);
+char					**split_bash_style(const char *input);
 #endif

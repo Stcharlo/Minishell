@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   cmd1.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/11 16:42:45 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/15 14:04:53 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+
+extern int		g_exit_code;
 
 void Build_in(char **tab, int i, t_ast **env)
 {
@@ -313,7 +315,8 @@ void cd_recognition(char **tab, int i, t_ast **env)
     i++;
     if (access(tab[i], R_OK) != 0)
     {
-        printf("cd: %s: No such file or directory\n", tab[i]);
+        strerror(errno);
+        g_exit_code = 1;
         free(buffer);
         return ;
     }
