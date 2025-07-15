@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 17:10:09 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/09 17:39:18 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/13 13:45:53 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,12 @@ char	*unquoted_var_expansion(char *str, t_ast **env)
                 || (str[i + len] >= 'a' && str[i + len] <= 'z')
                 || (str[i + len] == '_') || (str[i + len] == '?')))
                 len++;
-            str = expand_one(str, start, len, env);
-            i = 0;
+            if (len > 1)
+            {
+                str = expand_one(str, start, len, env);
+                i = 0;
+            }
+            i++;
         }
         else
             i++;

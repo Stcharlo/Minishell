@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 15:27:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/12 15:57:31 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
                 dup2(output_fd, STDOUT_FILENO);
                 close(output_fd);
             }
+            signal(SIGINT, SIG_DFL);
+            signal(SIGQUIT, SIG_DFL);
             exec_cmd(node, env, 1);
             exit(0);
         }
@@ -78,6 +80,10 @@ void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
             {
                 g_exit_code = WEXITSTATUS(status);
                 (*env)->env->last_pid = pid;
+            }
+            else if (WIFSIGNALED(status))
+            {
+                g_exit_code = 128 + WTERMSIG(status);
             }
         }
     }

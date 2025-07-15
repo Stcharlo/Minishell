@@ -16,13 +16,14 @@ GREEN = \033[0;92m
 BLUE = \033[0;94m
 CYAN = \033[0;96m
 YELLOW = \033[0;93m
+WHITE= \033[0;37m\
 
 # Source files (all with correct relative paths and .c extensions)
-SRC = read.c quotes.c libft.c ft_split.c expand.c chained_list.c ft_itoa.c \
+SRC = read.c quotes.c libft.c ft_split.c ft_itoa.c expand.c chained_list.c bash_split.c \
       heredoc/get_next_line.c heredoc/heredoc.c heredoc/heredoc_utlis.c \
       execution_posix/exec.c execution_posix/exec_recursion.c \
       cmd/cmd1.c cmd/cmd2.c \
-      ast/new_ast.c \
+      ast/new_ast.c signal/signal.c
 
 # Object files, with obj/ prefix and .o extension
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
@@ -36,7 +37,7 @@ all: $(NAME)
 # Link objects into archive/library
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(INCS) $(LDLIBS) -o $@ $^
-	@echo "$(GREEN)minishell compiled successfully!$(BLUE)"
+	@echo "$(GREEN)minishell compiled successfully!$(WHITE)"
 
 # Create directories for object files
 $(DIRS):

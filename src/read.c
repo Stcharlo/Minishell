@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 18:01:35 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/15 14:45:02 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,18 +19,18 @@ int check_type(char *str)
     if (!strcmp(str, "|"))
         return (PIPE);
     else if (!strcmp(str, "<"))
-        return (INPUT_REDIRECT);
+        return(INPUT_REDIRECT);
     else if (!strcmp(str, "<<"))
-        return (HEREDOC);
+        return(HEREDOC);
     else if (!strcmp(str, ">"))
-        return (OUTPUT_REDIRECT);
+        return(OUTPUT_REDIRECT);
     else if (!strcmp(str, ">>"))
-        return (APPEND);
+        return(APPEND);
     else if (contains_meta_character(str))
-        return (INVALID);
-    else
+        return(INVALID);
+    else    
         return (WORD);
-    // Make the difference between command and args ? Need to check access_ok => command otherwise just args
+    // Make the difference between command and args ? Need to check access_ok => command otherwise just args   
 }
 
 ASTNode *create_ast(int type, char *word)
@@ -74,7 +74,7 @@ void separate_tokens(char *str)
     int i;
     int count_letters;
     int b_meta;
-
+    
     i = 0;
     count_letters = 0;
     b_meta = 0;
@@ -82,7 +82,7 @@ void separate_tokens(char *str)
     {
         while (isspace(str[i]))
             i++;
-        while (is_meta_character(str[i]))
+        while(is_meta_character(str[i]))
         {
             b_meta = 1;
             count_letters++;
@@ -95,43 +95,41 @@ void separate_tokens(char *str)
         }
     }
 }
-
 /// @brief keeps on reading user input, add_history of input, checks for cmds such as clear and exit and calls process_tokens
 /// @param lst chained list for the tokenisation
-/// @param env
-void infinite_read(t_token **lst, t_ast **env)
+/// @param env 
+void	infinite_read(t_token **lst , t_ast **env)
 {
-    char *line;
+    char	*line;
 
     while (1)
     {
         line = get_input();
         if (!line)
-            continue;
+            return ;
         if (line[0] == 0)
-        {
-            free(line);
-            continue;
-        }
+            {
+                free(line);
+                continue;
+            }
         add_history(line);
         if (!strcmp(line, "clear"))
             clear_history();
         if (!strcmp(line, "exit"))
         {
             free(line);
-            break;
+            break ;
         }
         process_tokens(lst, line, env);
     }
 }
-
 /// @brief reads a complete line of the user input and checks if there are open quotes once quotes are closed it sends the user input
-/// @param
+/// @param  
 /// @return unparsed input from the user
-char *get_input(void)
+char	*get_input(void)
 {
-    char *line;
-    char *tmp;
+    char	*line;
+    char    *tmp;
 
     line = readline("Minishell> ");
     while (open_quotes(line))
@@ -139,6 +137,7 @@ char *get_input(void)
         tmp = readline_open_quotes(line);
         free(line);
         line = tmp;
+        free(tmp);
     }
     return (line);
 }
@@ -146,132 +145,88 @@ char *get_input(void)
 void unlink_redirection(t_token **lst)
 {
     t_token *tmp;
-
+    
     tmp = *lst;
-    while (tmp)
+    while(tmp)
     {
         if (!ft_strcmp(tmp->value, "<<"))
             unlink(tmp->next->value);
         tmp = tmp->next;
     }
 }
-
-void exit_status(t_token **lst)
+void	exit_status(t_token **lst)
 {
-    t_token *tmp;
-    char *exit_str;
+	t_token	*tmp;
+	char	*exit_str;
 
-    tmp = *lst;
-    exit_str = ft_itoa(g_exit_code);
-    while (tmp)
-    {
-        if (!ft_strcmp(tmp->value, "$?"))
-        {
-            free(tmp->value);
-            tmp->value = ft_strdup(exit_str);
-        }
-        tmp = tmp->next;
-    }
-    free(exit_str);
-}
-
-char *txt_detection(const char *line)
-{
-    int i;
-    int j;
-    int len;
-
-    if (!line)
-        return NULL;
-    len = strlen(line);
-    char *res = malloc(len + 1);
-    if (!res)
-        return NULL;
-
-    for (i = 0; i < len; i++)
-        res[i] = 'a';
-    res[len] = 0;
-
-    i = 0;
-    j = 0;
-    while (i + j < len)
-    {
-        if (line[i + j] == '\'')
-        {
-            j++; // opening single quote
-            while (i + j < len && line[i + j] != '\'')
-                res[i++] = 'o'; // inside single quotes
-            if (i < len)
-                j++; // closing single quote
-        }
-        else if (line[i + j] == '\"')
-        {
-            j++; // opening double quote
-            while (i + j < len && line[i + j] != '\"')
-                res[i++] = 'o'; // inside double quotes
-            if (i < len)
-                j++; // closing double quote
-        }
-        else
-        {
-            i++;
-        }
-    }
-    return res;
+	tmp = *lst;
+	exit_str = ft_itoa(g_exit_code);
+	while (tmp)
+	{
+		if (!ft_strcmp(tmp->value, "$?"))
+		{
+			free(tmp->value);
+			tmp->value = ft_strdup(exit_str);
+		}
+		tmp = tmp->next;
+	}
+	free(exit_str);
 }
 
 /// @brief parsing user input
 /// @param lst list for the tokens
 /// @param line input from the user
-/// @param env
-void process_tokens(t_token **lst, char *line, t_ast **env)
+/// @param env 
+void	process_tokens(t_token **lst, char *line, t_ast **env)
 {
-    ASTNode **nodes;
-    char **cmd;
-    char **cmd_index;
-    char *txt;
+	ASTNode	**nodes;
+	char	**cmd;
 
-    line = unquoted_var_expansion(line, env);
-    txt = txt_detection(line);
-    line = clean_line(line, env);
-    cmd = ft_split(line, "\t\n|&;()<>");
-    cmd_index = ft_split_index(line, "\t\n|&;()<>", txt);
-    create_list(lst, cmd, cmd_index);
-    show_list(*lst);
-    exit_status(lst);
-    check_heredoc(lst);
-    nodes = build_and_print_ast(*lst, env);
-    execute_nodes(nodes, env);
-    if (nodes && *nodes)
-        ast_free(*nodes);
-    unlink_redirection(lst);
+	line = unquoted_var_expansion(line, env);
+	cmd = split_bash_style(line);
+	line = clean_line(line, env);
+	create_list(lst, cmd);
+	exit_status(lst);
+	check_heredoc(lst);
+	nodes = build_and_print_ast(*lst, env);
+	execute_nodes(nodes, env);
+	if (nodes && *nodes)
+		ast_free(*nodes);
+	unlink_redirection(lst);
     free(nodes);
     free_split(cmd);
-    free_stack(lst);
+    free_stack(lst);   
 }
 
 /// @brief main function calling infinite read
-/// @param argc
-/// @param argv
-/// @param env
-/// @return
-int main(int argc, char **argv, char **env)
+/// @param argc 
+/// @param argv 
+/// @param env 
+/// @return 
+int	main(int argc, char **argv, char **env)
 {
     (void)argc;
     (void)argv;
-
+    
     t_token *list;
     t_token **lst;
     t_ast **AST;
     t_ast *ASt;
-
+    
     ASt = NULL;
     AST = &ASt;
     list = NULL;
     lst = &list;
+    setup_sigint_handler();
+	setup_sigquit_handler();
+	disable_echoctl();
     initialise_env(AST, env);
     initialise_exp(AST, env);
+    initialise_shlvl(AST);
     infinite_read(lst, AST);
     rl_clear_history();
+    free_export(ASt->env->env);         // tableau env
+    free_export(ASt->env->export);   // tableau export
+	free(ASt->env); 
     return (g_exit_code);
 }

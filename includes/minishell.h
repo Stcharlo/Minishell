@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/11 15:24:58 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/15 14:28:37 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # define _POSIX_C_SOURCE 200809L
+# define ECHOCTL 0001000
 
 # include <ctype.h>
 # include <dirent.h>
@@ -23,15 +24,21 @@
 # include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
+# include <errno.h>
 # include <stdlib.h>
 # include <string.h>
+# include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <termios.h>
 # include <unistd.h>
 
 # define BUILTIN "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
 # define REDIRECTION "|:<:>:<<:>>"
+
+# define PARENT 0
+# define CHILD 1
 
 # define BUFFER_SIZE 1024
 # define INVALID 0
@@ -133,9 +140,8 @@ void					*ft_calloc(size_t nmemb, size_t size);
 char					*ft_strjoin(char const *s1, char const *s2);
 char					*ft_strchr(const char *s, int c);
 
-void					sigint_handler(int sig_num);
-void					process_tokens(t_token **lst, char *line, t_ast **env);
-char					*get_input(void);
+void				process_tokens(t_token **lst, char *line, t_ast **env);
+char				*get_input(void);
 void					infinite_read(t_token **lst, t_ast **env);
 char					*get_value(char *var, int n, t_ast **env);
 
@@ -152,9 +158,8 @@ void					show_list(t_token *list);
 void					free_stack(t_token **stack);
 int						ft_lstsize(t_token *lst);
 void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
-int						create_list(t_token **start, char **str,
-							char **str_index);
-t_token					*ft_lstnew(char *str, char *str_index);
+int						create_list(t_token **start, char **str);
+t_token					*ft_lstnew(char *str);
 
 void					execute_nodes(ASTNode **head, t_ast **env);
 
@@ -175,11 +180,10 @@ void					apply_redirections(ASTNode *node);
 void					pwd_recognition(t_ast **env);
 void					env_recognition(t_ast **env);
 void					echo_recognition(char **argv, int i);
-void					cd_recognition(char **tab, int i, t_ast **env);
+void					cd_recognition(char **argv, int i, t_ast **env);
 void					Build_in(char **argv, int i, t_ast **env);
 void					export_recognition(char **argv, int i, t_ast **env);
 void					add_export(char *argv, t_ast **env);
-void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
 void					show_env(t_ast **env);
 void					unset_env(char *argv, t_ast **env);
 void					unset_recognition(char **argv, int i, t_ast **env);
@@ -198,6 +202,17 @@ void					initialise_exp(t_ast **env, char **envp);
 int						cmd(char **tab, t_ast **env);
 int						cmd_recognize(char *tab);
 void					free_split(char **split);
+void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
+void					initialise_shlvl(t_ast **env);
+char					*number_shlvl(t_ast **env);
+int						ft_atoi(const char *nptr);
+char					*ft_itoa(int n);
+void					print_error(int num, char *tab);
+int						access_error(char *tab);
+void					free_export(char **export);
+void					free_ast_tree(t_ast *node);
+int						ft_isdigit(int i);
+
 
 // gnl
 char					*ft_strjoin(char const *s1, char const *s2);
@@ -213,10 +228,11 @@ void					clean_heredoc(char **argv);
 void					read_heredoc(char *limiter);
 void					free_tab(char **tab);
 void					check_heredoc(t_token **lst);
-char					*ft_itoa(int n);
-char					**ft_split_index(char *s, const char *delim,
-							char *s_index);
-int						split_word_index(char **psplit, const char *s,
-							const char *delim, char *s_index);
+void					setup_sigint_handler(void);
+void					setup_sigquit_handler(void);
+void					disable_echoctl(void);
+char					**split_quote_aware(const char *s, const char *delims);
+char					**split_bash_style(const char *input);
+void					exit_status(t_token **lst);
 
 #endif

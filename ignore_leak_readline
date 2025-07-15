@@ -1,0 +1,35 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    ignore_leak_readline                               :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/07/13 19:13:28 by stcharlo          #+#    #+#              #
+#    Updated: 2025/07/13 19:18:23 by stcharlo         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+{
+    readline
+    Memcheck:Leak
+    ...
+    obj:*libreadline.so.*
+}
+{
+    history
+    Memcheck:Leak
+    ...
+    fun:add_history
+}
+{
+    bin
+    Memcheck:Leak
+    obj:/bin/*
+}
+{
+    usr
+    Memcheck:Leak
+    ...
+    obj:/usr/bin/*
+}

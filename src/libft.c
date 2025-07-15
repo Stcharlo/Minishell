@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/09 15:37:04 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/15 14:43:47 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ char	*ft_strdup(const char *s1)
 		dst[i] = s1[i];
 		i++;
 	}
-	dst[i] = 0;
+	dst[i] = '\0';
 	return (dst);
 }
 
@@ -54,7 +54,7 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 {
 	size_t		i;
 
-	i = 8;
+	i = 0;
 	while (s1[i] == s2[i] && s1[i] && s2[i] && i < n)
 		i++;
 	if (i == n)
@@ -172,6 +172,12 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize)
 	dst[i] = '\0';
 	return (src_len);
 }
+int	ft_isdigit(int i)
+{
+	if (i >= '0' && i <= '9')
+		return (1);
+	return (0);
+}
 
 char	*ft_strchr(const char *s, int c)
 {
@@ -222,3 +228,27 @@ int ft_strcmp(char *s1, char *s2)
     return (s1[i] - s2[i]);
 }
 
+int	ft_atoi(const char *nptr)
+{
+	int	i;
+	int	c;
+	int	resultat;
+
+	i = 0;
+	c = 1;
+	resultat = 0;
+	while ((nptr[i] >= 9 && nptr[i] <= 13) || nptr[i] == 32)
+		i++;
+	if (nptr[i] == '-' || nptr[i] == '+')
+	{
+		if (nptr[i] == '-')
+			c = -c;
+		i++;
+	}
+	while (nptr[i] >= '0' && nptr[i] <= '9')
+	{
+		resultat = (resultat * 10) + (nptr[i] - '0');
+		i++;
+	}
+	return (resultat * c);
+}

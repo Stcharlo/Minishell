@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/10 19:43:20 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/15 14:29:22 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,38 @@ static int	split_word(char **psplit, const char *s, const char *delim,
     return (1);
 }
 
+static int is_delim(char c, const char *delims) {
+    while (*delims)
+        if (c == *delims++)
+            return 1;
+    return 0;
+}
+
+char **split_quote_aware(const char *s, const char *delims) {
+    char **result = malloc(sizeof(char*) * (strlen(s) + 2));
+    int i = 0, j = 0, k = 0, in_single = 0, in_double = 0;
+    char buf[4096];
+
+    while (s[i]) {
+        while (isspace(s[i]))
+            i++;
+        if (!s[i]) break;
+        k = 0;
+        in_single = in_double = 0;
+        while (s[i]) {
+            if (s[i] == '\'' && !in_double) in_single = !in_single, i++;
+            else if (s[i] == '"' && !in_single) in_double = !in_double, i++;
+            else if (!in_single && !in_double && is_delim(s[i], delims)) break;
+            else buf[k++] = s[i++];
+        }
+        buf[k] = 0;
+        result[j++] = strdup(buf);
+        if (s[i] && is_delim(s[i], delims)) i++;
+    }
+    result[j] = NULL;
+    return result;
+}
+
 char	**ft_split(char *s, const char *delim)
 {
 	char	**psplit;
@@ -123,61 +155,6 @@ char	**ft_split(char *s, const char *delim)
 	return (psplit);
 }
 
-char	**ft_split_index(char *s, const char *delim, char *s_index)
-{
-	char	**psplit;
-	int		count;
-
-	if (!s || !delim)
-		return (NULL);
-	count = count_words(s, delim);
-	psplit = malloc(sizeof(char *) * (count + 1));
-	if (!psplit)
-		return (NULL);
-	if (split_word_index(psplit, s, delim, s_index) == -1)
-		return (NULL);
-    
-	return (psplit);
-}
-
-int	split_word_index(char **psplit, const char *s, const char *delim,
-		char *s_index)
-{
-    int word = 0;
-    int i = 0;
-    int start;
-
-    while (s[i])
-    {
-        while (s[i] && isspace(s[i]))
-            i++;
-        if (!s[i])
-            break;
-
-        start = i;
-        if (is_delimiter(s[i], delim))
-			{
-		while (is_delimiter(s[i], delim))
-            i++;
-        }
-        else
-        {
-            while (s[i] && !isspace(s[i]) && !is_delimiter(s[i], delim))
-                i++;
-        }
-        int len = i - start;
-        psplit[word] = malloc(sizeof(char) * (len + 1));
-        if (!psplit[word])
-        {
-            free_all(psplit);
-            return (-1);
-        }
-        ft_strlcpy(psplit[word], s_index + start, len + 1);
-        word++;
-    }
-    psplit[word] = NULL;
-    return (1);
-}
 
 char	**ft_split_once_range(const char *s, char sep, int start, int end)
 {

@@ -6,11 +6,13 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/11 16:42:45 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/15 14:55:08 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+
+extern int g_exit_code;
 
 void Build_in(char **tab, int i, t_ast **env)
 {
@@ -92,16 +94,17 @@ void unset_exp(char *argv, t_ast **env)
     while (current->env->export[j])
     {
         if (ft_strncmp(current->env->export[j], (target), strlen(target)) != 0)
-        {
-            temp[count] = current->env->export[j];
-            count++;
-        }
+            temp[count++] = current->env->export[j];
+		else
+		{
+			free(current->env->export[j]);
+		}
         j++;
     }
     temp[count] = NULL;
-    free(current->env->export);
+	free(target);
+	free(current->env->export);
     current->env->export = temp;
-    show_export(env);
     return ;
 }
 
@@ -122,17 +125,21 @@ void unset_env(char *argv, t_ast **env)
     while (current->env->env[j])
     {
         if (ft_strncmp(current->env->env[j], argv, strlen(argv)) != 0)
-        {
-            temp[count] = current->env->env[j];
-            count++;
-        }
+            temp[count++] = current->env->env[j];
+		else
+		{
+			free(current->env->env[j]);
+		}
         j++;
     }
     temp[count] = NULL;
     free(current->env->env);
     current->env->env = temp;
-    show_env(env);
     return ;
+}
+char  *cat_dup(char *s1)
+{
+   return ft_strjoin("export ", s1);
 }
 
 void export_recognition(char **argv, int i, t_ast **env)
@@ -179,7 +186,6 @@ void    add_env(char *argv, t_ast **env)
      temp[i + 1] = NULL;
     free(current->env->env);
     current->env->env = temp;
-    show_env(env);
     return ;
 }
 
@@ -251,7 +257,6 @@ void    add_export(char *argv, t_ast **env)
      temp[i + 1] = NULL;
     free(current->env->export);
     current->env->export = temp;
-    show_export(env);
     return ;
 }
 void show_export(t_ast **env)
@@ -307,26 +312,54 @@ void cd_recognition(char **tab, int i, t_ast **env)
     char *oldpwd;
     char *pwd;
     char *buffer2;
+	int error_type;
 
     buffer = malloc(1024);
     buffer2 = malloc(1024);
     i++;
-    if (access(tab[i], R_OK) != 0)
-    {
-        printf("cd: %s: No such file or directory\n", tab[i]);
-        free(buffer);
-        return ;
-    }
-    oldpwd = getcwd(buffer2, 1024);
-    if (chdir(tab[i]) != 0)
-        return ;
-    pwd = getcwd(buffer, 1024);
-    pwd_change(pwd, oldpwd, env);
-    free(buffer);
-    free(buffer2);
-    return ;
+    error_type = access_error(tab[i]);
+	if (error_type == 0)
+	{
+    	oldpwd = getcwd(buffer2, 1024);
+    	if (chdir(tab[i]) != 0)
+        	return ;
+    	pwd = getcwd(buffer, 1024);
+    	pwd_change(pwd, oldpwd, env);
+    	free(buffer);
+    	free(buffer2);
+		return;
+	}
+	print_error(error_type, tab[i]);
+	free(buffer);
+	free(buffer2);
+	return ;
+}
+void print_error(int num, char *tab)
+{
+	if (num == 1)
+	{
+        strerror(errno);
+		//printf("cd: %s: No such file or directory\n", tab);
+        g_exit_code = 1;
+		return ;
+	}
+	if (num == 2)
+	{
+		printf("cd: %s: Permission denied\n", tab);
+        g_exit_code = 1;
+		return ;
+	}
+	return ;
 }
 
+int access_error(char *tab)
+{
+	if (access(tab, F_OK) != 0)
+		return (1);
+	if (access(tab, R_OK) != 0)
+		return (2);
+	return (0);
+}
 void pwd_change(char *pwd, char *oldpwd, t_ast **env)
 {
     char *pw;
@@ -469,7 +502,100 @@ void initialise_exp(t_ast **env, char **envp)
     current->env->export[i] = NULL;
     return ;
 }
-char  *cat_dup(char *s1)
+
+void	initialise_shlvl(t_ast **env)
 {
-   return ft_strjoin("export ", s1);
+	char	*str;
+	char	*merge;
+	int		shlvl;
+	char	*final;
+
+	str = number_shlvl(env);
+	if (!str)
+		return ;
+	shlvl = ft_atoi(str);
+	free(str);
+	shlvl++;
+	final = ft_itoa(shlvl);
+	unset_env("SHLVL=", env);
+	unset_exp("SHLVL=", env);
+	merge = ft_strjoin("SHLVL=", final);
+	free(final);
+	add_env(merge, env);
+	add_export(merge, env);
+	free(merge);
+	return ;
 }
+
+char	*number_shlvl(t_ast **env)
+{
+	t_ast	*current;
+	int		i;
+	char	*str;
+	char	*result;
+
+	i = 0;
+	current = *env;
+	if (!current->env->env)
+		return (NULL);
+	while (current->env->env[i])
+	{
+		if (!(ft_strncmp(current->env->env[i], "SHLVL=", 6)))
+		{
+			str = current->env->env[i] + 6;
+			while (*str && !ft_isdigit(*str))
+					str++;
+			result = ft_strdup(str);
+			return (result);
+		}
+		i++;
+	}
+	return (ft_strdup("0"));
+}
+
+void	free_export(char **export)
+{
+	int i = 0;
+	if (!export)
+		return;
+	while (export[i])
+		free(export[i++]);
+	free(export);
+}
+
+void	free_ast_tree(t_ast *node)
+{
+	int i;
+
+	if (!node)
+		return;
+
+	// Libérer récursivement les sous-arbres
+	free_ast_tree(node->left);
+	free_ast_tree(node->right);
+	free_ast_tree(node->target);
+
+	// Libérer les enfants (tableau de pointeurs)
+	if (node->children)
+	{
+		for (i = 0; i < node->child_count; i++)
+			free_ast_tree(node->children[i]);
+		free(node->children);
+	}
+
+	// Libérer la valeur (commande, opérateur, etc.)
+	if (node->value)
+		free(node->value);
+
+	// Libérer l'environnement s'il existe
+	if (node->env)
+	{
+		free_export(node->env->env);         // tableau env
+		free_export(node->env->export);   // tableau export
+		free(node->env);                  // struct t_env
+	}
+
+	free(node); // Enfin, libérer la structure du nœud lui-même
+}
+
+
