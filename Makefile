@@ -22,7 +22,8 @@ WHITE= \033[0;37m\
 SRC = read.c quotes.c libft.c ft_split.c ft_itoa.c expand.c chained_list.c bash_split.c \
       heredoc/get_next_line.c heredoc/heredoc.c heredoc/heredoc_utlis.c \
       execution_posix/exec.c execution_posix/exec_recursion.c \
-      cmd/cmd1.c cmd/cmd2.c \
+      cmd/cmd1.c cmd/cmd2.c cmd/cmd3.c cmd/cmd4.c cmd/cmd5.c cmd/cmd6.c \
+	  cmd/cmd7.c \
       ast/new_ast.c signal/signal.c
 
 # Object files, with obj/ prefix and .o extension

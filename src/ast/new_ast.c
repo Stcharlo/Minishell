@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   new_ast.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/08 15:06:13 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/20 19:15:43 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include <unistd.h>
 
 
-ASTNode *create_ast_node(int type, char *value)
+ASTNode	*create_ast_node(int type, char *value)
 {
-    ASTNode *new;
+    ASTNode	*new;
     
     new = malloc(sizeof(ASTNode));
     if (!new)
@@ -65,6 +65,11 @@ static char	*ft_strjoin_slash(char const *s1, char const *s2)
     if (!tmp)
         return (NULL);
     res = ft_strjoin(tmp, s2);
+    if (!res)
+    {
+        free(tmp);
+        return (NULL);
+    }
     free(tmp);
     return (res);
 }
@@ -79,7 +84,7 @@ char	*get_cmd_path(const char *cmd, t_ast **env)
     
     current = *env;
 	if (strchr(cmd, '/'))
-		return (strdup(cmd));
+		return (ft_strdup(cmd));
 	path_var = NULL;
     i = 0;
 	while (current->env->env[i])

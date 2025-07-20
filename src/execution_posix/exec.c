@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 13:45:28 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/07/15 18:26:03 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ void	exec_cmd(ASTNode *node, t_ast **env, int child)
 	tab[argc] = 0;
 	apply_redirections(node);
 	path = get_cmd_path(tab[0], env);
-	if (cmd(tab, env))
+	if (cmd(tab, path, env))
 	{
 		if (path == NULL || 0 > access(path, F_OK))
 		{

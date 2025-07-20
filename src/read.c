@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 14:45:02 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/15 17:24:30 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,8 +225,6 @@ int	main(int argc, char **argv, char **env)
     initialise_shlvl(AST);
     infinite_read(lst, AST);
     rl_clear_history();
-    free_export(ASt->env->env);         // tableau env
-    free_export(ASt->env->export);   // tableau export
-	free(ASt->env); 
+    free_env_complete(ASt);
     return (g_exit_code);
 }

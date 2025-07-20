@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 14:28:37 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/07/20 19:13:21 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,10 +178,10 @@ void					apply_redirections(ASTNode *node);
 
 // Pour les test
 void					pwd_recognition(t_ast **env);
-void					env_recognition(t_ast **env);
+void					env_recognition(char **tab, int j, t_ast **env);
 void					echo_recognition(char **argv, int i);
 void					cd_recognition(char **argv, int i, t_ast **env);
-void					Build_in(char **argv, int i, t_ast **env);
+void					build_in(char **argv, int i, t_ast **env);
 void					export_recognition(char **argv, int i, t_ast **env);
 void					add_export(char *argv, t_ast **env);
 void					show_env(t_ast **env);
@@ -199,7 +199,7 @@ void					redirection(char **argv, int i);
 void					output_recognition(char **argv, int i);
 void					initialise_env(t_ast **env, char **envp);
 void					initialise_exp(t_ast **env, char **envp);
-int						cmd(char **tab, t_ast **env);
+int						cmd(char **tab, char *path, t_ast **env);
 int						cmd_recognize(char *tab);
 void					free_split(char **split);
 void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
@@ -209,9 +209,18 @@ int						ft_atoi(const char *nptr);
 char					*ft_itoa(int n);
 void					print_error(int num, char *tab);
 int						access_error(char *tab);
-void					free_export(char **export);
 void					free_ast_tree(t_ast *node);
 int						ft_isdigit(int i);
+int						search_value(char *str, t_ast **env);
+void					exit_recognition(char **argv, int i);
+void					free_env_complete(t_ast *env);
+void					valid_number_fail(void);
+void					num_has_sign(char **argv, int i);
+void					free_both(char *target, t_ast *current);
+int						tab_len(t_ast *current);
+void					cd_exit_code(void);
+char					*path_var_set(t_ast *env, const char *key);
+char					*full_path(char **paths, const char *cmd);
 
 
 // gnl
