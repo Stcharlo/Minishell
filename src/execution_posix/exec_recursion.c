@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/12 15:57:31 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/02 12:55:18 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,40 +50,38 @@ void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
     int status;
     pid_t pid;
 
-    if (!cmd_recognize(node->value))
+    if (!cmd_recognize(node->value)) {
+        // Builtin: run in parent, set g_exit_code only if builtin sets it
         exec_cmd(node, env, 0);
-    else
-    {
+        // Builtins should set g_exit_code themselves on error
+    } else {
+        // External command: run in child, set g_exit_code from child exit status
         if ((pid = fork()) < 0)
             return;
-        if (pid == 0)
-        {
-            if (input_fd != STDIN_FILENO)
-            {
+        if (pid == 0) {
+            if (input_fd != STDIN_FILENO) {
                 dup2(input_fd, STDIN_FILENO);
                 close(input_fd);
             }
-            if (output_fd != STDOUT_FILENO)
-            {
+            if (output_fd != STDOUT_FILENO) {
                 dup2(output_fd, STDOUT_FILENO);
                 close(output_fd);
             }
             signal(SIGINT, SIG_DFL);
             signal(SIGQUIT, SIG_DFL);
             exec_cmd(node, env, 1);
+            // Do not set g_exit_code in child, just exit with correct code
             exit(0);
-        }
-        else
-        {
+        } else {
             waitpid(pid, &status, 0);
-            if (WIFEXITED(status))
-            {
-                g_exit_code = WEXITSTATUS(status);
+            if (WIFEXITED(status)) {
+                // Store normal exit codes in the env structure, not in g_exit_code
+                (*env)->env->error_code = WEXITSTATUS(status);
                 (*env)->env->last_pid = pid;
-            }
-            else if (WIFSIGNALED(status))
-            {
+            } else if (WIFSIGNALED(status)) {
+                // Only use g_exit_code for signal-related exits
                 g_exit_code = 128 + WTERMSIG(status);
+                (*env)->env->error_code = g_exit_code;
             }
         }
     }
@@ -98,9 +96,8 @@ void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 void exec_pipe_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
 {
     int fd[2];
-    int status;
-    pid_t left_pid;
-    pid_t right_pid;
+    int status_left, status_right;
+    pid_t left_pid, right_pid;
 
     if (pipe(fd) < 0)
         return (perror("pipe"));
@@ -114,8 +111,17 @@ void exec_pipe_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
         exec_pipe_left(node, env, input_fd, fd);
     close(fd[0]);
     close(fd[1]);
-    waitpid(left_pid, &status, 0);
-    waitpid(right_pid, &status, 0);
+    waitpid(left_pid, &status_left, 0);
+    waitpid(right_pid, &status_right, 0);
+    // Set the exit code of the last command in the pipeline
+    if (WIFEXITED(status_right)) {
+        // Store normal exit codes in the env structure, not in g_exit_code
+        (*env)->env->error_code = WEXITSTATUS(status_right);
+    } else if (WIFSIGNALED(status_right)) {
+        // Only use g_exit_code for signal-related exits
+        g_exit_code = 128 + WTERMSIG(status_right);
+        (*env)->env->error_code = g_exit_code;
+    }
 }
 /// @brief recursive function that will check if the node is a pipe or a command
 /// @param node 

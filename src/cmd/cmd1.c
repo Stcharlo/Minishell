@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd1.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/20 18:27:40 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 12:42:46 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@ void	build_in(char **tab, int i, t_ast **env)
 			export_recognition(tab, i, env);
 		if (ft_strnstr("unset", tab[i]))
 			unset_recognition(tab, i, env);
-		if (ft_strnstr("echo", tab[i]))
-			echo_recognition(tab, i);
-		if (ft_strnstr("exit", tab[i]))
-			exit_recognition(tab, i);
+	   if (ft_strnstr("echo", tab[i]))
+		   echo_recognition(tab, i, env);
+	   if (ft_strnstr("exit", tab[i]))
+		   exit_recognition(tab, i, env);
 		return ;
 	}
 	return ;
@@ -41,22 +41,33 @@ void	initialise_exp(t_ast **env, char **envp)
 {
 	t_ast	*current;
 	int		i;
-
+	
 	i = 0;
 	if (!envp)
-		return ;
+		return;
+	
 	current = *env;
+	if (!current || !current->env)
+		return;
+	
 	while (envp[i])
 		i++;
+	
 	current->env->export = malloc(sizeof(char *) * (i + 1));
+	if (!current->env->export)
+		return;
+	
 	i = 0;
 	while (envp[i])
 	{
 		current->env->export[i] = cat_dup(envp[i]);
+		if (!current->env->export[i]) {
+			// Should free previous allocations and handle error
+		}
 		i++;
 	}
 	current->env->export[i] = NULL;
-	return ;
+	return;
 }
 
 void	initialise_shlvl(t_ast **env)
@@ -66,21 +77,31 @@ void	initialise_shlvl(t_ast **env)
 	int		shlvl;
 	char	*final;
 
+	if (!env || !*env)
+		return;
+	
 	str = number_shlvl(env);
 	if (!str)
-		return ;
+		return;
+	
 	shlvl = ft_atoi(str);
 	free(str);
 	shlvl++;
+	
 	final = ft_itoa(shlvl);
+	if (!final)
+		return;
+	
 	unset_env("SHLVL=", env);
 	unset_exp("SHLVL=", env);
+	
 	merge = ft_strjoin("SHLVL=", final);
 	free(final);
+	
+	if (!merge)
+		return;
+	
 	add_env(merge, env);
-	add_export(merge, env);
-	free(merge);
-	return ;
 }
 
 char	*number_shlvl(t_ast **env)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd6.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:10:14 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/20 18:15:22 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 11:46:59 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,9 @@ void	cd_recognition(char **tab, int i, t_ast **env)
 			return ;
 		pwd = getcwd(buffer, 1024);
 		pwd_change(pwd, oldpwd, env);
+		(*env)->env->error_code = 0;
 	}
-	print_error(error_type, tab[i]);
+	print_error(error_type, tab[i], env);
 	free(buffer);
 	free(buffer2);
 	return ;
@@ -49,18 +50,18 @@ void	cd_exit_code(void)
 	exit(g_exit_code);
 }
 
-void	print_error(int num, char *tab)
+void	print_error(int num, char *tab, t_ast **env)
 {
 	if (num == 1)
 	{
 		strerror(errno);
-		g_exit_code = 1;
+		(*env)->env->error_code = 1;
 		return ;
 	}
 	if (num == 2)
 	{
 		printf("cd: %s: Permission denied\n", tab);
-		g_exit_code = 1;
+		(*env)->env->error_code = 1;
 		return ;
 	}
 	return ;

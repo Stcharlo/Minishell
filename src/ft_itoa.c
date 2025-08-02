@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:53:28 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/13 17:55:23 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 13:18:06 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ char	*ft_itoa(int n)
 	result = allocate_mem(len);
 	if (!result)
 		return (0);
+	if (nb == 0)
+		result[0] = '0';
 	if (nb < 0)
 		nb *= -1;
 	i = len - 1;

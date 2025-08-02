@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/20 19:13:21 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 13:08:14 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@
 
 # include <ctype.h>
 # include <dirent.h>
+# include <errno.h>
 # include <fcntl.h>
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
-# include <errno.h>
 # include <stdlib.h>
 # include <string.h>
 # include <sys/stat.h>
@@ -72,6 +72,7 @@ typedef struct s_env
 {
 	char				**env;
 	char				**export;
+	int					error_code;
 	pid_t				last_pid;
 }						t_env;
 
@@ -140,8 +141,8 @@ void					*ft_calloc(size_t nmemb, size_t size);
 char					*ft_strjoin(char const *s1, char const *s2);
 char					*ft_strchr(const char *s, int c);
 
-void				process_tokens(t_token **lst, char *line, t_ast **env);
-char				*get_input(void);
+void					process_tokens(t_token **lst, char *line, t_ast **env);
+char					*get_input(void);
 void					infinite_read(t_token **lst, t_ast **env);
 char					*get_value(char *var, int n, t_ast **env);
 
@@ -179,7 +180,7 @@ void					apply_redirections(ASTNode *node);
 // Pour les test
 void					pwd_recognition(t_ast **env);
 void					env_recognition(char **tab, int j, t_ast **env);
-void					echo_recognition(char **argv, int i);
+void					echo_recognition(char **argv, int i, t_ast **env);
 void					cd_recognition(char **argv, int i, t_ast **env);
 void					build_in(char **argv, int i, t_ast **env);
 void					export_recognition(char **argv, int i, t_ast **env);
@@ -207,21 +208,20 @@ void					initialise_shlvl(t_ast **env);
 char					*number_shlvl(t_ast **env);
 int						ft_atoi(const char *nptr);
 char					*ft_itoa(int n);
-void					print_error(int num, char *tab);
+void					print_error(int num, char *tab, t_ast **env);
 int						access_error(char *tab);
 void					free_ast_tree(t_ast *node);
 int						ft_isdigit(int i);
 int						search_value(char *str, t_ast **env);
-void					exit_recognition(char **argv, int i);
+void					exit_recognition(char **argv, int i, t_ast **env);
 void					free_env_complete(t_ast *env);
-void					valid_number_fail(void);
-void					num_has_sign(char **argv, int i);
+void					valid_number_fail(t_ast **env);
+void					num_has_sign(t_ast **env);
 void					free_both(char *target, t_ast *current);
 int						tab_len(t_ast *current);
 void					cd_exit_code(void);
 char					*path_var_set(t_ast *env, const char *key);
 char					*full_path(char **paths, const char *cmd);
-
 
 // gnl
 char					*ft_strjoin(char const *s1, char const *s2);
@@ -242,6 +242,9 @@ void					setup_sigquit_handler(void);
 void					disable_echoctl(void);
 char					**split_quote_aware(const char *s, const char *delims);
 char					**split_bash_style(const char *input);
-void					exit_status(t_token **lst);
+void					exit_status(t_token **lst, t_ast **env);
+int						check_syntax_errors(t_token *lst);
+void					ft_putstr_fd(char *s, int fd);
+void					print_exit_code(t_ast **env);
 
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd7.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:21:38 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/20 18:24:04 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 12:55:16 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,26 +86,70 @@ int	cmd_recognize(char *tab)
 	return (1);
 }
 
-void	initialise_env(t_ast **env, char **envp)
+void initialise_env(t_ast **env, char **envp)
 {
-	t_ast	*current;
-	int		i;
+    t_ast *current;
+    int i;
 
-	i = 0;
-	if (!envp)
-		return ;
-	*env = malloc(sizeof(t_ast));
-	(*env)->env = malloc(sizeof(t_env));
-	current = *env;
-	while (envp[i])
-		i++;
-	current->env->env = malloc(sizeof(char *) * (i + 1));
-	i = 0;
-	while (envp[i])
-	{
-		current->env->env[i] = ft_strdup(envp[i]);
-		i++;
-	}
-	current->env->env[i] = NULL;
-	return ;
+    i = 0;
+    if (!envp)
+        return;
+    
+    // Step 1: Allocate main structures
+    *env = malloc(sizeof(t_ast));
+    if (!*env)
+        return;
+    
+    (*env)->env = malloc(sizeof(t_env));
+    if (!(*env)->env) {
+        free(*env);
+        return;
+    }
+    
+    current = *env;
+    
+    // Step 2: Count environment variables
+    while (envp[i])
+        i++;
+    
+    // Step 3: Allocate array for environment
+    current->env->env = malloc(sizeof(char *) * (i + 1));
+    if (!current->env->env) {
+        free((*env)->env);
+        free(*env);
+        return;
+    }
+    
+    // Step 4: Copy environment variables
+    i = 0;
+    while (envp[i]) {
+        current->env->env[i] = ft_strdup(envp[i]);
+        if (!current->env->env[i]) {
+            // Clean up on failure
+            while (--i >= 0)
+                free(current->env->env[i]);
+            free(current->env->env);
+            free(current->env);
+            free(*env);
+            return;
+        }
+        i++;
+    }
+    
+    // Step 5: Set NULL terminator
+    current->env->env[i] = NULL;
+    
+    // Step 6: Initialize other fields
+    current->env->error_code = 0;
+    current->env->last_pid = 0;
+    current->env->export = NULL;
+    current->type = 0;
+    current->value = NULL;
+    current->left = NULL;
+    current->right = NULL;
+    current->children = NULL;
+    current->child_count = 0;
+    current->target = NULL;
+    current->parent = NULL;
+    return;
 }

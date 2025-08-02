@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd3.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:37:34 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/20 17:54:38 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 11:39:30 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ void	unset_recognition(char **argv, int i, t_ast **env)
 	current = *env;
 	i++;
 	if (argv[i] == NULL)
-		return ;
+	(*env)->env->error_code = 0;
+	return ;
 	while (argv[i])
 	{
 		if (search_value(argv[i], env) != 1)
@@ -56,9 +57,11 @@ int	search_value(char *str, t_ast **env)
 		}
 	}
 	free(target);
-	if (count > 0)
+	if (count > 0) {
+		(*env)->env->error_code = 1;
 		return (0);
-	g_exit_code = 0;
+	}
+	(*env)->env->error_code = 0;
 	return (1);
 }
 

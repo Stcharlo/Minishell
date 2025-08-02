@@ -3,99 +3,111 @@
 /*                                                        :::      ::::::::   */
 /*   cmd2.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:01:46 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/20 17:35:34 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 12:55:23 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-extern int g_exit_code;
+extern int	g_exit_code;
 
 int	is_valid_number(const char *str)
 {
-	int		i;
+    int	i;
 
-	i = 0;
-	if (!str || str[0] == '\0')
-		return (0);
-	if (str[i] == '+' || str[i] == '-')
-	{
-		i++;
-		if (str[i] == '\0')
-			return (0);
-	}
-	while (str[i])
-	{
-		if (!isdigit((unsigned char)str[i]))
-			return (0);
-		i++;
-	}
-	return (1);
+    i = 0;
+    if (!str || str[0] == '\0')
+        return (0);
+    if (str[i] == '+' || str[i] == '-')
+    {
+        i++;
+        if (str[i] == '\0')
+            return (0);
+    }
+    while (str[i])
+    {
+        if (!isdigit((unsigned char)str[i]))
+            return (0);
+        i++;
+    }
+    return (1);
 }
 
-void	exit_recognition(char **argv, int i)
+void exit_recognition(char **argv, int i, t_ast **env)
 {
-	int		a;
-
-	a = 0;
-	while (argv[a])
-		a++;
-	if (a > 2)
-	{
-		g_exit_code = 1;
-		exit(g_exit_code);
-	}
-	if (argv[i + 1])
-	{
-		if (!is_valid_number(argv[i + 1]))
-			valid_number_fail();
-		else if (argv[i + 1][0] == '-' || argv[i + 1][0] == '+')
-			num_has_sign(argv, i);
-		else
-		{
-			g_exit_code = atoi(argv[i + 1]) % 256;
-			exit(g_exit_code);
-		}
-	}
-	else
-		exit(g_exit_code);
+    int a;
+    a = 0;
+    while (argv[a])
+        a++;
+    if (a > 2)
+    {
+        (*env)->env->error_code = 1;
+        exit((*env)->env->error_code);
+    }
+    if (argv[i + 1])
+    {
+        if (!is_valid_number(argv[i + 1]))
+        {
+            (*env)->env->error_code = 2;
+            valid_number_fail(env);
+        }
+        else if (argv[i + 1][0] == '-' || argv[i + 1][0] == '+')
+        {
+            (*env)->env->error_code = (256 + atoi(argv[i + 1])) % 256;
+            num_has_sign(env);
+        }
+        else
+        {
+            (*env)->env->error_code = atoi(argv[i + 1]) % 256;
+            exit((*env)->env->error_code);
+        }
+    }
+    else
+    {
+        // Use existing error_code which should be properly set from previous command
+        // Only use g_exit_code for signal-related exits
+        if (g_exit_code >= 128) {
+            (*env)->env->error_code = g_exit_code;
+        }
+        // Otherwise, env->error_code should already have the correct value
+        exit((*env)->env->error_code);
+    }
 }
 
-void	num_has_sign(char **argv, int i)
+void num_has_sign(t_ast **env)
 {
-	g_exit_code = (256 + atoi(argv[i + 1])) % 256;
-	exit(g_exit_code);
+    exit((*env)->env->error_code);
 }
 
-void	valid_number_fail(void)
+void valid_number_fail(t_ast **env)
 {
-	strerror(2);
-	g_exit_code = 2;
-	exit(g_exit_code);
+    printf("exit: hello: numeric argument required\n");
+    exit((*env)->env->error_code);
 }
 
-void	echo_recognition(char **argv, int i)
+void	echo_recognition(char **argv, int i, t_ast **env)
 {
-	int		count;
+    int	count;
 
-	count = 1;
-	i++;
-	if (argv[i] && ft_strcmp(argv[i], "-n") == 0)
-	{
-		count = 0;
-		i++;
-	}
-	while (argv[i])
-	{
-		write(1, argv[i], strlen(argv[i]));
-		if (argv[i + 1])
-			write(1, " ", 1);
-		i++;
-	}
-	if (count)
-		write(1, "\n", 1);
-	return ;
+    count = 1;
+    i++;
+    (*env)->env->error_code = 0;
+    if (argv[i] && ft_strcmp(argv[i], "-n") == 0)
+    {
+        count = 0;
+        i++;
+    }
+    while (argv[i])
+    {
+        write(1, argv[i], strlen(argv[i]));
+        if (argv[i + 1])
+            write(1, " ", 1);
+        i++;
+    }
+    if (count)
+        write(1, "\n", 1);
+    return ;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 17:24:30 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 13:33:11 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ void separate_tokens(char *str)
 void	infinite_read(t_token **lst , t_ast **env)
 {
     char	*line;
-
+    
     while (1)
     {
         line = get_input();
@@ -120,6 +120,8 @@ void	infinite_read(t_token **lst , t_ast **env)
             free(line);
             break ;
         }
+        
+        // process_tokens now handles the token list lifecycle fully.
         process_tokens(lst, line, env);
     }
 }
@@ -132,12 +134,19 @@ char	*get_input(void)
     char    *tmp;
 
     line = readline("Minishell> ");
+    
+    if (line == NULL)
+        return NULL;
+    
     while (open_quotes(line))
     {
         tmp = readline_open_quotes(line);
+        if (!tmp) {
+            free(line);
+            return NULL;
+        }
         free(line);
         line = tmp;
-        free(tmp);
     }
     return (line);
 }
@@ -154,23 +163,43 @@ void unlink_redirection(t_token **lst)
         tmp = tmp->next;
     }
 }
-void	exit_status(t_token **lst)
+void	exit_status(t_token **lst, t_ast **env)
 {
-	t_token	*tmp;
-	char	*exit_str;
+    t_token	*tmp;
+    char	*exit_str;
+    int     exit_value;
 
-	tmp = *lst;
-	exit_str = ft_itoa(g_exit_code);
-	while (tmp)
-	{
-		if (!ft_strcmp(tmp->value, "$?"))
-		{
-			free(tmp->value);
-			tmp->value = ft_strdup(exit_str);
-		}
-		tmp = tmp->next;
-	}
-	free(exit_str);
+    tmp = *lst;
+    
+    // Get the correct exit code: prefer g_exit_code for signals, otherwise use error_code
+    if (g_exit_code >= 128) {
+        exit_value = g_exit_code;
+        // Update the env error_code to match for consistency
+        (*env)->env->error_code = g_exit_code;
+    } else {
+        // Use the environment's error_code for normal command results
+        exit_value = (*env)->env->error_code;
+    }
+    
+    // Ensure error code is properly truncated to match Bash behavior
+    exit_value = exit_value % 256;
+    
+    exit_str = ft_itoa(exit_value);
+    while (tmp)
+    {
+        if (!ft_strcmp(tmp->value, "$?"))
+        {
+            free(tmp->value);
+            tmp->value = ft_strdup(exit_str);
+        }
+        tmp = tmp->next;
+    }
+    free(exit_str);
+    
+    // Reset global signal code after using it
+    if (g_exit_code >= 128) {
+        g_exit_code = 0;
+    }
 }
 
 /// @brief parsing user input
@@ -179,23 +208,49 @@ void	exit_status(t_token **lst)
 /// @param env 
 void	process_tokens(t_token **lst, char *line, t_ast **env)
 {
-	ASTNode	**nodes;
-	char	**cmd;
+    ASTNode	**nodes;
+    char	**cmd;
 
-	line = unquoted_var_expansion(line, env);
-	cmd = split_bash_style(line);
-	line = clean_line(line, env);
-	create_list(lst, cmd);
-	exit_status(lst);
-	check_heredoc(lst);
-	nodes = build_and_print_ast(*lst, env);
-	execute_nodes(nodes, env);
-	if (nodes && *nodes)
-		ast_free(*nodes);
-	unlink_redirection(lst);
-    free(nodes);
+    // Apply variable expansion to the line first
+    line = unquoted_var_expansion(line, env);
+    
+    // Then split and create tokens
+    cmd = split_bash_style(line);
+    
+    // create_list appends, so we must start with a NULL list.
+    *lst = NULL; 
+    create_list(lst, cmd);
+
+    check_heredoc(lst);
+    
+    // Check for syntax errors 
+    if (check_syntax_errors(*lst))
+    {
+        (*env)->env->error_code = 2;
+        free_split(cmd);
+        free_stack(lst);
+        return;
+    }
+    
+    // Now handle $? expansion specifically in tokens
+    exit_status(lst, env); 
+    
+    nodes = build_and_print_ast(*lst, env);
+    if (nodes && *nodes)
+    {
+        execute_nodes(nodes, env);
+        ast_free(*nodes);
+    }
+    else
+    {
+        (*env)->env->error_code = 0;
+    }
+
+    if (nodes)
+        free(nodes);
+    unlink_redirection(lst);
     free_split(cmd);
-    free_stack(lst);   
+    free_stack(lst);
 }
 
 /// @brief main function calling infinite read
@@ -218,13 +273,33 @@ int	main(int argc, char **argv, char **env)
     list = NULL;
     lst = &list;
     setup_sigint_handler();
-	setup_sigquit_handler();
-	disable_echoctl();
+    setup_sigquit_handler();
+    disable_echoctl();
     initialise_env(AST, env);
     initialise_exp(AST, env);
     initialise_shlvl(AST);
     infinite_read(lst, AST);
     rl_clear_history();
+    
+    // Store the final error code before freeing
+    int final_exit_code = ASt->env->error_code;
+    
     free_env_complete(ASt);
-    return (g_exit_code);
+    
+    // For signal-related exits (like SIGINT = Ctrl+C)
+    if (g_exit_code >= 128)
+        return g_exit_code;
+        
+    // For normal exits, use the shell's stored error code
+    // This will be the same as what bash returns with $?
+    return (final_exit_code % 256);
+}
+
+/**
+ * Debug function to print the current exit code
+ * Uncomment for debugging only
+ */
+void print_exit_code(t_ast **env)
+{
+    printf("Current exit code: %d\n", (*env)->env->error_code);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:41:26 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 14:43:47 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 13:02:15 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,23 +133,29 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	size_t	s2_len;
 	int		i;
 
+	if (!s1 || !s2)
+		return NULL;
+	
 	i = 0;
 	s1_len = ft_strlen(s1);
 	s2_len = ft_strlen(s2);
+	
 	str = malloc(sizeof(char) * (s1_len + s2_len + 1));
 	if (!str)
 		return (NULL);
-	while (s1[i])
-	{
+	
+	while (s1[i]) {
 		str[i] = s1[i];
 		i++;
 	}
-	while (s2[i - s1_len])
-	{
-		str[i] = s2[i - s1_len];
-		i++;
+	
+	int j = 0;
+	while (s2[j]) {
+		str[i + j] = s2[j];
+		j++;
 	}
-	str[i] = '\0';
+	
+	str[i + j] = '\0';
 	return (str);
 }
 
@@ -251,4 +257,17 @@ int	ft_atoi(const char *nptr)
 		i++;
 	}
 	return (resultat * c);
+}
+
+/**
+ * Outputs the string 's' to the given file descriptor.
+ * 
+ * @param s The string to output.
+ * @param fd The file descriptor on which to write.
+ */
+void	ft_putstr_fd(char *s, int fd)
+{
+	if (!s)
+		return ;
+	write(fd, s, ft_strlen(s));
 }

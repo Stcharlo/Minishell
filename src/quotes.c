@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 18:28:27 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/13 13:14:22 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/02 13:33:14 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +27,21 @@ char	*get_value(char *var, int n, t_ast **env)
 	current = *env;
 	i = 0;
 	if (!strcmp(var, "?"))
-		return (ft_itoa(g_exit_code));
+	{
+		// Use the environment's error_code for $?, not g_exit_code
+		// g_exit_code is only for signal-related exits
+		int exit_code = (g_exit_code >= 128) ? g_exit_code : current->env->error_code;
+		return (ft_itoa(exit_code % 256));
+	}
 	while (current->env->env[i])
 	{
 		if (!strncmp(current->env->env[i], var, n) && current->env->env[i][n] == '=')
-			return (current->env->env[i] + n + 1);
+			return (ft_strdup(current->env->env[i] + n + 1));
 		i++;
 	}
 	if (!current->env->env[i])
-		return (NULL);
-	return (NULL);
+		return (ft_strdup(""));
+	return (ft_strdup(""));
 }
 
 /// @brief eliminating double quotes & expanding variables

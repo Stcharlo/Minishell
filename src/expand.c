@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 17:10:09 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 16:35:13 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/02 13:33:12 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,37 +21,57 @@ char	*unquoted_var_expansion(char *str, t_ast **env)
     int	i;
     int	start;
     int	len;
+    int in_single_quotes = 0;
+    int in_double_quotes = 0;
+
+    if (!str)
+        return (NULL);
 
     i = 0;
     while (str[i])
     {
-        if (str[i] == '\'')
+        if (str[i] == '\'' && !in_double_quotes)
         {
+            in_single_quotes = !in_single_quotes;
             i++;
-            while (str[i] && str[i] != '\'')
-                i++;
-            if (str[i])
-                i++;
         }
-        else if (str[i] == '$')
+        else if (str[i] == '"' && !in_single_quotes)
+        {
+            in_double_quotes = !in_double_quotes;
+            i++;
+        }
+        else if (str[i] == '$' && !in_single_quotes)
         {
             start = i;
             len = 1;
-            if (str[i+len] == '?')
+            
+            // Handle $? specifically
+            if (str[i + 1] == '?')
             {
-                str = expand_one(str, start, len+1, env);
-                unquoted_var_expansion(str, env);
+                len = 2;
+                str = expand_one(str, start, len, env);
+                i = 0; // Restart from beginning after expansion
+                continue;
             }
+            
+            // Handle other variables
             while (str[i + len] && ((str[i + len] >= 'A' && str[i + len] <= 'Z')
                 || (str[i + len] >= 'a' && str[i + len] <= 'z')
-                || (str[i + len] == '_')))
+                || (str[i + len] == '_')
+                || (str[i + len] >= '0' && str[i + len] <= '9')))
                 len++;
+                
             if (len > 1)
             {
                 str = expand_one(str, start, len, env);
-                i = 0;
+                i = 0; // Restart from beginning after expansion
+                continue;
             }
-            i++;
+            else
+            {
+                // Single $ with no valid variable name - leave as is
+                i++;
+            }
         }
         else
             i++;
@@ -67,26 +87,52 @@ char	*unquoted_var_expansion(char *str, t_ast **env)
 /// @return 
 char	*expand_one(const char *str, int start, int len, t_ast **env)
 {
-    char	**cmd;
     char	*var;
     char	*val;
+    char	*before;
+    char	*after;
     char	*res;
+    char	*tmp;
 
-    cmd = ft_split_dollar_range(str, start, start + len);
+    if (!str || start < 0 || len <= 1)
+        return (ft_strdup(str ? str : ""));
+
+    // Get the part before the variable
+    before = ft_substr(str, 0, start);
+    if (!before)
+        before = ft_strdup("");
+
+    // Get the variable name (skip the $)
     var = ft_substr(str, start + 1, len - 1);
+    if (!var)
+        var = ft_strdup("");
+
+    // Get the variable value
     val = get_value(var, len - 1, env);
     if (!val)
-        val = "";
-    res = ft_strjoin(cmd[0], val);
-    if (cmd[2])
-        res = ft_strjoin(res, cmd[2]);
+        val = ft_strdup("");
+
+    // Get the part after the variable
+    after = ft_strdup(str + start + len);
+    if (!after)
+        after = ft_strdup("");
+
+    // Combine all parts
+    tmp = ft_strjoin(before, val);
+    if (!tmp)
+        tmp = ft_strdup("");
+    
+    res = ft_strjoin(tmp, after);
+    if (!res)
+        res = ft_strdup("");
+
+    // Clean up
     free(var);
-    free(cmd[0]);
-    if (cmd[1])
-        free(cmd[1]);
-    if (cmd[2])
-        free(cmd[2]);
-    free(cmd);
+    free(before);
+    free(after);
+    free(val);
+    free(tmp);
+
     return (res);
 }
 

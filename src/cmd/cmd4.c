@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd4.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:59:42 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/07/20 18:03:39 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/02 12:42:46 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,10 @@ void	unset_env(char *argv, t_ast **env)
 
 char	*cat_dup(char *s1)
 {
-	return (ft_strjoin("export ", s1));
+    if (!s1)
+        return NULL;
+    
+    return ft_strjoin("export ", s1);
 }
 
 void	export_recognition(char **argv, int i, t_ast **env)
@@ -61,18 +64,21 @@ void	export_recognition(char **argv, int i, t_ast **env)
 	{
 		if (parse_exp(argv[i]) == 1)
 		{
-			g_exit_code = 1;
+			(*env)->env->error_code = 1;
 			return ;
 		}
-		if (parse_exp(argv[i]) != 1 && !strchr(argv[i], '='))
+		if (parse_exp(argv[i]) != 1 && !strchr(argv[i], '=')) {
 			add_export(argv[i], env);
-		if (parse_exp(argv[i]) != 1 && strchr(argv[i], '='))
-		{
+			(*env)->env->error_code = 0;
+		}
+		if (parse_exp(argv[i]) != 1 && strchr(argv[i], '=')) {
 			add_env(argv[i], env);
 			add_export(argv[i], env);
+			(*env)->env->error_code = 0;
 		}
 		i++;
 	}
+	(*env)->env->error_code = 0;
 	return ;
 }
 

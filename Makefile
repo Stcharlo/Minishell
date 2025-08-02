@@ -19,7 +19,7 @@ YELLOW = \033[0;93m
 WHITE= \033[0;37m\
 
 # Source files (all with correct relative paths and .c extensions)
-SRC = read.c quotes.c libft.c ft_split.c ft_itoa.c expand.c chained_list.c bash_split.c \
+SRC = read.c quotes.c libft.c ft_split.c ft_itoa.c expand.c chained_list.c bash_split.c syntax_check.c \
       heredoc/get_next_line.c heredoc/heredoc.c heredoc/heredoc_utlis.c \
       execution_posix/exec.c execution_posix/exec_recursion.c \
       cmd/cmd1.c cmd/cmd2.c cmd/cmd3.c cmd/cmd4.c cmd/cmd5.c cmd/cmd6.c \
