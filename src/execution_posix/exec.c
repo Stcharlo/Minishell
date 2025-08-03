@@ -15,6 +15,11 @@
 extern int	g_exit_code;
 
 
+void command_not_found_error(const char *cmd)
+{
+	fprintf(stderr, "%s: command not found\n", cmd);
+}
+
 void handle_errno_error(const char *path)
 {
 	if (errno == EACCES)
@@ -162,6 +167,7 @@ void	exec_cmd(ASTNode *node, t_ast **env, int child)
 		(*env)->env->error_code = 0;
 		if (path == NULL || 0 > access(path, F_OK))
 		{
+			command_not_found_error(tab[0]);
 		 (*env)->env->error_code = 127; // Command not found
 			exit_child ((*env)->env->error_code, child);
 			return;

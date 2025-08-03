@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   heredoc_1.c                                        :+:      :+:    :+:   */
+/*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 14:30:17 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/08 12:57:47 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,12 @@ void check_heredoc(t_token **lst)
     while (list)
     {
         if (list->type == HEREDOC)
-            start_heredoc(list->next->value);
+        {
+            if (list->next && list->next->value)
+                start_heredoc(list->next->value);
+            // If no next token or no value, heredoc is malformed
+            // but syntax error should already be caught by syntax checker
+        }
         list = list->next;
     }      
 }

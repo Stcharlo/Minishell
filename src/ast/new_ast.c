@@ -118,6 +118,28 @@ char	*get_cmd_path(const char *cmd, t_ast **env)
 }
 
 
+int define_type_from_token(t_token *token, t_ast **env)
+{
+	char *cmd_path;
+
+	// If the token was quoted, operators should be treated as words
+	if (token->was_quoted && (!strcmp(token->value, "|") || !strcmp(token->value, "<") || 
+		!strcmp(token->value, ">") || !strcmp(token->value, ">>") || !strcmp(token->value, "<<")))
+		return (NODE_ARGUMENT);
+
+	cmd_path = get_cmd_path(token->value, env);
+	if (cmd_path)
+	{
+		free(cmd_path);
+		return (NODE_COMMAND);
+	}
+	if (!strcmp(token->value, "<<") || !strcmp(token->value, "<") || !strcmp(token->value, ">>") || !strcmp(token->value, ">"))
+		return (NODE_REDIRECTION);
+	if (!strcmp(token->value,"|"))
+		return (NODE_PIPE);
+	return (NODE_ARGUMENT);
+}
+
 int define_type(char *str, t_ast **env)
 {
 	char *cmd_path;
@@ -176,9 +198,9 @@ ASTNode *parse_command(t_token **lst_ptr, t_ast **env)
     ASTNode *cmd = NULL;
 
     // 1. Find the command
-    while (lst && define_type(lst->value, env) != NODE_PIPE)
+    while (lst && define_type_from_token(lst, env) != NODE_PIPE)
     {
-        if (define_type(lst->value, env) != NODE_REDIRECTION)
+        if (define_type_from_token(lst, env) != NODE_REDIRECTION)
         {
             cmd = create_ast_node(NODE_COMMAND, lst->value);
             lst = lst->next;
@@ -191,9 +213,9 @@ ASTNode *parse_command(t_token **lst_ptr, t_ast **env)
     }
 
     // 2. Add arguments (skip redirections and pipes)
-    while (lst && define_type(lst->value, env) != NODE_PIPE)
+    while (lst && define_type_from_token(lst, env) != NODE_PIPE)
     {
-        if (define_type(lst->value, env) != NODE_REDIRECTION)
+        if (define_type_from_token(lst, env) != NODE_REDIRECTION)
         {
             add_ast_child(cmd, create_ast_node(NODE_ARGUMENT, lst->value));
             lst = lst->next;

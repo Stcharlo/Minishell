@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/02 13:08:14 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,16 @@
 # define LEFT 0
 # define RIGHT 1
 
+typedef struct s_token_info {
+	char *value;
+	int was_quoted;
+} t_token_info;
+
 typedef struct s_token
 {
 	char				*value;
 	int					type;
+	int					was_quoted;
 	struct s_token		*next;
 	struct s_token		*prev;
 }						t_token;
@@ -159,8 +165,11 @@ void					show_list(t_token *list);
 void					free_stack(t_token **stack);
 int						ft_lstsize(t_token *lst);
 void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
+void					ft_lstadd_back_with_quote_info(t_token **lst, t_token *new, char *str, int was_quoted);
 int						create_list(t_token **start, char **str);
+int						create_list_with_quote_info(t_token **start, t_token_info *tokens, int token_count);
 t_token					*ft_lstnew(char *str);
+t_token					*ft_lstnew_with_quote_info(char *str, int was_quoted);
 
 void					execute_nodes(ASTNode **head, t_ast **env);
 
@@ -242,9 +251,13 @@ void					setup_sigquit_handler(void);
 void					disable_echoctl(void);
 char					**split_quote_aware(const char *s, const char *delims);
 char					**split_bash_style(const char *input);
+t_token_info			*split_bash_style_with_quotes(const char *input, int *token_count);
 void					exit_status(t_token **lst, t_ast **env);
 int						check_syntax_errors(t_token *lst);
 void					ft_putstr_fd(char *s, int fd);
 void					print_exit_code(t_ast **env);
+void					handle_errno_error(const char *path);
+void					command_not_found_error(const char *cmd);
+void					exit_child(int exit_code, int child);
 
 #endif

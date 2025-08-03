@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:06:26 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/02 11:45:54 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 06:40:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ void	add_export(char *argv, t_ast **env)
 	while (current->env->export[i])
 	{
 		temp[i] = current->env->export[i];
+		i++;
 	}
 	(*env)->env->error_code = 0;
 	i++;

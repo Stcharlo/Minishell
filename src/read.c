@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/02 13:33:11 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,17 +209,18 @@ void	exit_status(t_token **lst, t_ast **env)
 void	process_tokens(t_token **lst, char *line, t_ast **env)
 {
     ASTNode	**nodes;
-    char	**cmd;
+    t_token_info *tokens;
+    int token_count;
 
     // Apply variable expansion to the line first
     line = unquoted_var_expansion(line, env);
     
-    // Then split and create tokens
-    cmd = split_bash_style(line);
+    // Use the new quote-aware tokenizer
+    tokens = split_bash_style_with_quotes(line, &token_count);
     
     // create_list appends, so we must start with a NULL list.
     *lst = NULL; 
-    create_list(lst, cmd);
+    create_list_with_quote_info(lst, tokens, token_count);
 
     check_heredoc(lst);
     
@@ -227,29 +228,29 @@ void	process_tokens(t_token **lst, char *line, t_ast **env)
     if (check_syntax_errors(*lst))
     {
         (*env)->env->error_code = 2;
-        free_split(cmd);
+        // Free the tokens array
+        free(tokens);
         free_stack(lst);
         return;
     }
     
     // Now handle $? expansion specifically in tokens
     exit_status(lst, env); 
-    
+
     nodes = build_and_print_ast(*lst, env);
     if (nodes && *nodes)
     {
         execute_nodes(nodes, env);
         ast_free(*nodes);
     }
-    else
-    {
-        (*env)->env->error_code = 0;
-    }
+    // Note: Do not reset error_code to 0 when nodes is NULL
+    // This preserves the exit code from previous commands or syntax errors
 
     if (nodes)
         free(nodes);
     unlink_redirection(lst);
-    free_split(cmd);
+    // Free the tokens array
+    free(tokens);
     free_stack(lst);
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   bash_split.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 14:17:39 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/20 19:21:57 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,14 @@ static void	skip_whitespace(const char **s)
 		(*s)++;
 }
 
-static char	*extract_token(const char **s)
+static t_token_info	extract_token_with_quote_info(const char **s)
 {
 	const char *p = *s;
 	char *token = malloc(strlen(p) + 3);
+	t_token_info info = {NULL, 0};
+	
 	if (!token)
-		return NULL;
+		return info;
 
 	int i = 0;
 	int in_single_quote = 0, in_double_quote = 0;
@@ -60,6 +62,7 @@ static char	*extract_token(const char **s)
 		if (*p == '\'' && !in_double_quote)
 		{
 			in_single_quote = !in_single_quote;
+			info.was_quoted = 1;
 			p++;
 			continue;
 		}
@@ -67,6 +70,7 @@ static char	*extract_token(const char **s)
 		if (*p == '\"' && !in_single_quote)
 		{
 			in_double_quote = !in_double_quote;
+			info.was_quoted = 1;
 			p++;
 			continue;
 		}
@@ -84,7 +88,14 @@ static char	*extract_token(const char **s)
 
 	token[i] = '\0';
 	*s = p;
-	return token;
+	info.value = token;
+	return info;
+}
+
+static char	*extract_token(const char **s)
+{
+	t_token_info info = extract_token_with_quote_info(s);
+	return info.value;
 }
 
 char	**split_bash_style(const char *input)
@@ -109,6 +120,31 @@ char	**split_bash_style(const char *input)
 		}
 	}
 	tokens[count] = NULL;
+	return tokens;
+}
+
+t_token_info	*split_bash_style_with_quotes(const char *input, int *token_count)
+{
+	const char *p = input;
+	size_t alloc_count = strlen(input) / 2 + 5;
+	t_token_info *tokens = malloc(sizeof(t_token_info) * alloc_count);
+	if (!tokens)
+		return NULL;
+
+	int count = 0;
+	while (*p)
+	{
+		skip_whitespace(&p);
+		if (*p == '\0')
+			break;
+
+		t_token_info info = extract_token_with_quote_info(&p);
+		if (info.value && info.value[0] != '\0')
+		{
+			tokens[count++] = info;
+		}
+	}
+	*token_count = count;
 	return tokens;
 }
 

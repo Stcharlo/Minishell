@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/02 12:55:18 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ void exec_pipe_right(ASTNode *node, t_ast **env, int output_fd, int *fd)
         dup2(output_fd, STDOUT_FILENO);
     close(fd[1]);
     exec_ast(node->right, env, STDIN_FILENO, output_fd);
-    exit(0);
+    // Exit with the actual error code, not 0
+    exit((*env)->env->error_code);
 }
 
 void exec_pipe_left(ASTNode *node, t_ast **env, int input_fd, int *fd)
@@ -42,7 +43,8 @@ void exec_pipe_left(ASTNode *node, t_ast **env, int input_fd, int *fd)
     }
     close(fd[0]);
     exec_ast(node->left, env, input_fd, STDOUT_FILENO);
-    exit(0);
+    // Exit with the actual error code, not 0
+    exit((*env)->env->error_code);
 }
 
 void exec_command_node(ASTNode *node, t_ast **env, int input_fd, int output_fd)
