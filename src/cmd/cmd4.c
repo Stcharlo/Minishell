@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd4.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:59:42 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/02 12:42:46 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 14:52:59 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,6 @@ char	*cat_dup(char *s1)
 
 void	export_recognition(char **argv, int i, t_ast **env)
 {
-	t_ast	*current;
-	int		j;
-
-	j = 0;
-	current = *env;
 	i++;
 	if (argv[i] == NULL)
 		show_export(env);

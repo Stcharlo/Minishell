@@ -37,7 +37,7 @@ all: $(NAME)
 
 # Link objects into archive/library
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(INCS) $(LDLIBS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 	@echo "$(GREEN)minishell compiled successfully!$(WHITE)"
 
 # Create directories for object files

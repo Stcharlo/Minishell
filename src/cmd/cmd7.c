@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd7.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:21:38 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/02 12:55:16 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 14:53:16 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,6 @@ int	cmd(char **tab, char *path, t_ast **env)
 
 int	cmd_recognize(char *tab)
 {
-	int	i;
-
-	i = 0;
 	if (ft_strnstr(BUILTIN, tab) == 1)
 	{
 		return (0);

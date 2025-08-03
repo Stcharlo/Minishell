@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd3.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:37:34 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/02 11:39:30 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 14:52:29 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,6 @@ extern int	g_exit_code;
 
 void	unset_recognition(char **argv, int i, t_ast **env)
 {
-	t_ast	*current;
-
-	current = *env;
 	i++;
 	if (argv[i] == NULL)
 	(*env)->env->error_code = 0;

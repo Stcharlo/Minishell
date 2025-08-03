@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   chained_list.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 18:24:00 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 14:51:59 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,10 +88,8 @@ int	create_list_with_quote_info(t_token **start, t_token_info *tokens, int token
 
 void	ft_lstadd_back(t_token **lst, t_token *new, char *str)
 {
-	int		i;
 	t_token	*current;
 
-	i = ft_lstsize(*lst);
 	new->value = str;
 	new->type = check_type(str);
 	new->was_quoted = 0;
@@ -111,10 +109,8 @@ void	ft_lstadd_back(t_token **lst, t_token *new, char *str)
 
 void	ft_lstadd_back_with_quote_info(t_token **lst, t_token *new, char *str, int was_quoted)
 {
-	int		i;
 	t_token	*current;
 
-	i = ft_lstsize(*lst);
 	new->value = str;
 	new->was_quoted = was_quoted;
 	// Only assign operator types if the token was not quoted

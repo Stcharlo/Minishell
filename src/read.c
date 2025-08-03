@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 12:47:21 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/03 15:14:10 by antoine          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,18 +73,15 @@ void separate_tokens(char *str)
 {
     int i;
     int count_letters;
-    int b_meta;
     
     i = 0;
     count_letters = 0;
-    b_meta = 0;
     while (str[i])
     {
         while (isspace(str[i]))
             i++;
         while(is_meta_character(str[i]))
         {
-            b_meta = 1;
             count_letters++;
             i++;
         }
@@ -261,14 +258,14 @@ void	process_tokens(t_token **lst, char *line, t_ast **env)
 /// @return 
 int	main(int argc, char **argv, char **env)
 {
-    (void)argc;
-    (void)argv;
-    
+    int final_exit_code;
     t_token *list;
     t_token **lst;
     t_ast **AST;
     t_ast *ASt;
-    
+ 
+    (void)argc;
+    (void)argv;
     ASt = NULL;
     AST = &ASt;
     list = NULL;
@@ -281,26 +278,9 @@ int	main(int argc, char **argv, char **env)
     initialise_shlvl(AST);
     infinite_read(lst, AST);
     rl_clear_history();
-    
-    // Store the final error code before freeing
-    int final_exit_code = ASt->env->error_code;
-    
+    final_exit_code = ASt->env->error_code;
     free_env_complete(ASt);
-    
-    // For signal-related exits (like SIGINT = Ctrl+C)
     if (g_exit_code >= 128)
         return g_exit_code;
-        
-    // For normal exits, use the shell's stored error code
-    // This will be the same as what bash returns with $?
     return (final_exit_code % 256);
-}
-
-/**
- * Debug function to print the current exit code
- * Uncomment for debugging only
- */
-void print_exit_code(t_ast **env)
-{
-    printf("Current exit code: %d\n", (*env)->env->error_code);
 }
