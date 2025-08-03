@@ -52,7 +52,7 @@ void exit_recognition(char **argv, int i, t_ast **env)
         if (!is_valid_number(argv[i + 1]))
         {
             (*env)->env->error_code = 2;
-            valid_number_fail(env);
+            valid_number_fail(env, argv[i + 1]);
         }
         else if (argv[i + 1][0] == '-' || argv[i + 1][0] == '+')
         {
@@ -82,9 +82,9 @@ void num_has_sign(t_ast **env)
     exit((*env)->env->error_code);
 }
 
-void valid_number_fail(t_ast **env)
+void valid_number_fail(t_ast **env, char *arg)
 {
-    printf("exit: hello: numeric argument required\n");
+    fprintf(stderr, "exit: %s: numeric argument required\n", arg);
     exit((*env)->env->error_code);
 }
 

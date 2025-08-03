@@ -184,7 +184,7 @@ void					exec_pipe_node(ASTNode *node, t_ast **env, int input_fd,
 void					exec_ast(ASTNode *node, t_ast **env, int input_fd,
 							int output_fd);
 void					exec_cmd(ASTNode *node, t_ast **env, int child);
-void					apply_redirections(ASTNode *node);
+int						apply_redirections(ASTNode *node);
 
 // Pour les test
 void					pwd_recognition(t_ast **env);
@@ -224,7 +224,7 @@ int						ft_isdigit(int i);
 int						search_value(char *str, t_ast **env);
 void					exit_recognition(char **argv, int i, t_ast **env);
 void					free_env_complete(t_ast *env);
-void					valid_number_fail(t_ast **env);
+void					valid_number_fail(t_ast **env, char *arg);
 void					num_has_sign(t_ast **env);
 void					free_both(char *target, t_ast *current);
 int						tab_len(t_ast *current);

@@ -52,33 +52,6 @@ static int	open_output_redir(ASTNode *redir)
 	return (fd);
 }
 
-static void	apply_output_redirections(ASTNode *node)
-{
-	int fd;
-	int i;
-	ASTNode *child;
-
-	i = 0;
-	fd = -1;
-	while (i < node->child_count)
-	{
-		child = node->children[i];
-		if (child->type == NODE_REDIRECTION &&
-		   (!ft_strcmp(child->value, ">") || !ft_strcmp(child->value, ">>")))
-		{
-			if (fd != -1)
-				close(fd);
-			fd = open_output_redir(child);
-		}
-		i++;
-	}
-	if (fd != -1)
-	{
-		dup2(fd, STDOUT_FILENO);
-		close(fd);
-	}
-}
-
 /// @brief checking if node contains an input redirection and applying it to STDIN
 /// @param node 
 static int	open_input_redir(ASTNode *redir)
@@ -89,38 +62,50 @@ static int	open_input_redir(ASTNode *redir)
 	if (fd < 0)
 	{
 		perror("open");
-		exit(1);
+		return (-1);  // Return -1 instead of exiting
 	}
 	return (fd);
-}
-
-static void	apply_input_redirections(ASTNode *node)
-{
-	int i;
-	ASTNode *child;
-	int fd;
-
-	i = 0;
-	while (i < node->child_count)
-	{
-		child = node->children[i];
-		if (child->type == NODE_REDIRECTION && (!strcmp(child->value, "<") || !strcmp(child->value, "<<")))
-		{
-			fd = open_input_redir(child);
-			dup2(fd, STDIN_FILENO);
-			close(fd);
-		}
-		i++;
-	}
 }
 
 /// @brief calling the redirection functions
 /// @param node Tree with the cmd
 /// @param env 
-void	apply_redirections(ASTNode *node)
+int	apply_redirections(ASTNode *node)
 {
-	apply_input_redirections(node);
-	apply_output_redirections(node);
+	int i;
+	ASTNode *child;
+	int fd;
+	
+	// Process redirections in the order they appear in the command
+	i = 0;
+	while (i < node->child_count)
+	{
+		child = node->children[i];
+		if (child->type == NODE_REDIRECTION)
+		{
+			if (!strcmp(child->value, "<") || !strcmp(child->value, "<<"))
+			{
+				// Input redirection
+				fd = open_input_redir(child);
+				if (fd == -1)
+					return (-1);  // Stop processing on error
+				dup2(fd, STDIN_FILENO);
+				close(fd);
+			}
+			else if (!strcmp(child->value, ">") || !strcmp(child->value, ">>"))
+			{
+				// Output redirection
+				fd = open_output_redir(child);
+				if (fd == -1)
+					return (-1);  // Stop processing on error
+				dup2(fd, STDOUT_FILENO);
+				close(fd);
+			}
+		}
+		i++;
+	}
+	
+	return (0);  // Success
 }
 
 int is_directory(const char *path)
@@ -160,7 +145,15 @@ void	exec_cmd(ASTNode *node, t_ast **env, int child)
 		i++;
 	}
 	tab[argc] = 0;
-	apply_redirections(node);
+	
+	// Apply redirections and check for errors
+	if (apply_redirections(node) == -1)
+	{
+		(*env)->env->error_code = 1; // Redirection failed
+		exit_child((*env)->env->error_code, child);
+		return;
+	}
+	
 	path = get_cmd_path(tab[0], env);
 	if (cmd(tab, path, env))
 	{
