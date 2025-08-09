@@ -6,32 +6,31 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 14:30:17 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/09 12:10:52 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-void check_heredoc(t_token **lst)
+void	check_heredoc(t_token **lst)
 {
-    t_token *list;
-    list = *lst;
+	t_token	*list;
 
-    while (list)
-    {
-        if (list->type == HEREDOC)
-        {
-            if (list->next && list->next->value)
-                start_heredoc(list->next->value);
-            // If no next token or no value, heredoc is malformed
-            // but syntax error should already be caught by syntax checker
-        }
-        list = list->next;
-    }      
+	list = *lst;
+	while (list)
+	{
+		if (list->type == HEREDOC)
+		{
+			if (list->next && list->next->value)
+				start_heredoc(list->next->value);
+		}
+		list = list->next;
+	}
 }
-void start_heredoc(char *limiter)
-{	
-    read_heredoc(limiter);
+
+void	start_heredoc(char *limiter)
+{
+	read_heredoc(limiter);
 }
 
 void	tab_to_file(char **lines, const char *filename)
@@ -69,7 +68,7 @@ void	clean_heredoc(char **argv)
 		free(argv[1]);
 	get_next_line(-1);
 	unlink("here_doc");
-} 
+}
 
 void	read_heredoc(char *limiter)
 {
