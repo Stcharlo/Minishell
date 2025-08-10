@@ -6,104 +6,79 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 10:41:54 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/15 16:41:27 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/09 16:05:30 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-static int	is_delimiter(char c, const char *delim)
+typedef struct s_segment
 {
-	int	i;
+	const char	*s;
+	int			start;
+	int			len;
+	int			word;
+}	t_segment;
 
-	i = 0;
-	while (delim[i])
-	{
-		if (c == delim[i])
-			return (1);
-		i++;
-	}
+static int	copy_segment(char **psplit, t_segment seg)
+{
+	psplit[seg.word] = (char *)malloc(sizeof(char) * (seg.len + 1));
+	if (!psplit[seg.word])
+		return (-1);
+	ft_strlcpy(psplit[seg.word], seg.s + seg.start, seg.len + 1);
 	return (0);
 }
 
-static int	count_words(const char *s, const char *delim)
+static void	setup_segment(t_segment *seg, const char *s, int word)
 {
-	int	count;
-	int	i;
+	seg->s = s;
+	seg->word = word;
+}
 
-	count = 0;
+static int	process_next_word(char **psplit, const char *s,
+			const char *delim, int *word)
+{
+	int			i;
+	int			start;
+	int			len;
+	t_segment	seg;
+
+	i = skip_spaces(s, 0);
+	if (!s[i])
+		return (0);
+	start = i;
+	len = segment_length(s, delim, i);
+	setup_segment(&seg, s, *word);
+	seg.start = start;
+	seg.len = len;
+	if (copy_segment(psplit, seg) == -1)
+		return (-1);
+	(*word)++;
+	return (i + len);
+}
+
+static int	fill_split(char **psplit, const char *s, const char *delim)
+{
+	int	i;
+	int	word;
+	int	offset;
+
 	i = 0;
-	
+	word = 0;
 	while (s[i])
 	{
-		while (isspace(s[i]))
-			i++;
-		if (!s[i])
-			break;
-		if (is_delimiter(s[i], delim))
+		offset = process_next_word(psplit, s + i, delim, &word);
+		if (offset == -1)
 		{
-			count++;
-			i++;
+			free_all(psplit);
+			return (-1);
 		}
-		else
-		{
-			while (s[i] && !isspace(s[i]) && !is_delimiter(s[i], delim))
-				i++;
-			count++;
-		}
+		if (offset == 0)
+			break ;
+		i += offset;
 	}
-	return (count);
-}
-
-static void	free_all(char **psplit)
-{
-	int	word;
-
-	word = 0;
-	while (psplit[word])
-	{
-		free(psplit[word]);
-		word++;
-	}
-	free(psplit);
-}
-
-static int	split_word(char **psplit, const char *s, const char *delim,
-		int word)
-{
-    int i = 0;
-    int start;
-
-    while (s[i])
-    {
-        while (s[i] && isspace(s[i]))
-            i++;
-        if (!s[i])
-            break;
-
-        start = i;
-        if (is_delimiter(s[i], delim))
-			{
-		while (is_delimiter(s[i], delim))
-            i++;
-        }
-        else
-        {
-            while (s[i] && !isspace(s[i]) && !is_delimiter(s[i], delim))
-                i++;
-        }
-        int len = i - start;
-        psplit[word] = malloc(sizeof(char) * (len + 1));
-        if (!psplit[word])
-        {
-            free_all(psplit);
-            return (-1);
-        }
-        ft_strlcpy(psplit[word], s + start, len + 1);
-        word++;
-    }
-    psplit[word] = NULL;
-    return (1);
+	psplit[word] = NULL;
+	return (0);
 }
 
 char	**ft_split(char *s, const char *delim)
@@ -114,51 +89,10 @@ char	**ft_split(char *s, const char *delim)
 	if (!s || !delim)
 		return (NULL);
 	count = count_words(s, delim);
-	psplit = malloc(sizeof(char *) * (count + 1));
+	psplit = (char **)malloc(sizeof(char *) * (count + 1));
 	if (!psplit)
 		return (NULL);
-	if (split_word(psplit, s, delim, 0) == -1)
+	if (fill_split(psplit, s, delim) == -1)
 		return (NULL);
-    
 	return (psplit);
-}
-
-
-char	**ft_split_dollar_range(const char *s, int start, int end)
-{
-    char	**arr;
-    int		i, j;
-
-    if (!s || start < 0 || end < start)
-        return (NULL);
-    i = start;
-    while (s[i] && i <= end && s[i] != '$')
-        i++;
-    arr = malloc(sizeof(char *) * 4);
-    if (!arr)
-        return (NULL);
-    if (s[i] == '$' && i <= end)
-    {
-        arr[0] = ft_substr(s, 0, i);
-        j = i + 1;
-        while (s[j] && ((s[j] >= 'A' && s[j] <= 'Z') || (s[j] >= 'a' && s[j] <= 'z') || (s[j] == '_') || (s[j] == '?')))
-        {
-            if (s[j] == '?')
-            {
-                j++;
-                break;
-            }
-            j++;
-        }
-        arr[1] = ft_substr(s, i, j - i);
-        arr[2] = s[j] ? ft_strdup(s + j) : NULL;
-    }
-    else
-    {
-        arr[0] = ft_strdup(s);
-        arr[1] = NULL;
-        arr[2] = NULL;
-    }
-    arr[3] = NULL;
-    return (arr);
 }

@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/03 06:58:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/10 11:40:39 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,19 @@
 # define LEFT 0
 # define RIGHT 1
 
-typedef struct s_token_info {
-	char *value;
-	int was_quoted;
-} t_token_info;
+typedef struct s_pipe_data
+{
+	int					*fd;
+	pid_t				*pids;
+	int					input_fd;
+	int					output_fd;
+}						t_pipe_data;
+
+typedef struct s_token_info
+{
+	char				*value;
+	int					was_quoted;
+}						t_token_info;
 
 typedef struct s_token
 {
@@ -123,6 +132,13 @@ void					free_split(char **split);
 ASTNode					**build_and_print_ast(t_token *lst, t_ast **env);
 
 char					**ft_split(char *s, const char *delim);
+/* Functions from ft_split_utils.c */
+int						is_delimiter(char c, const char *delim);
+int						skip_spaces(const char *s, int i);
+int						segment_length(const char *s, const char *delim, int i);
+int						count_words(const char *s, const char *delim);
+void					free_all(char **psplit);
+/* End of ft_split_utils.c functions */
 char					*ft_strdup(const char *s1);
 size_t					ft_strlen(char const *src);
 int						ft_strcmp(char *s1, char *s2);
@@ -132,6 +148,7 @@ int						contains_meta_character(char *str);
 char					*ft_strjoin_buffer(char const *s1, char const *s2,
 							char buffer);
 size_t					ft_strlcpy(char *dst, const char *src, size_t dstsize);
+int						process_redirection_child(ASTNode *child);
 
 char					*readline_open_quotes(char *str);
 int						open_quotes(const char *str);
@@ -159,15 +176,23 @@ char					*expand_variable(char *str, t_ast **env);
 int						find_next_expand(const char *str, int *start, int *len);
 char					*expand_one(const char *str, int start, int len,
 							t_ast **env);
-
+char					*ft_strjoin_slash(char const *s1, char const *s2);
+int						is_directory(const char *path);
+int						is_var_char(char c);
+void					handle_quotes(const char *str, int i,
+							int *in_single_quotes, int *in_double_quotes);
+int						handle_var_expansion(char **str, int *i, t_ast **env,
+							int in_single_quotes);
 int						ft_strnstr(char *big, char *little);
 void					show_list(t_token *list);
 void					free_stack(t_token **stack);
 int						ft_lstsize(t_token *lst);
 void					ft_lstadd_back(t_token **lst, t_token *new, char *str);
-void					ft_lstadd_back_with_quote_info(t_token **lst, t_token *new, char *str, int was_quoted);
+void					ft_lstadd_back_with_quote_info(t_token **lst,
+							t_token *new, char *str, int was_quoted);
 int						create_list(t_token **start, char **str);
-int						create_list_with_quote_info(t_token **start, t_token_info *tokens, int token_count);
+int						create_list_with_quote_info(t_token **start,
+							t_token_info *tokens, int token_count);
 t_token					*ft_lstnew(char *str);
 t_token					*ft_lstnew_with_quote_info(char *str, int was_quoted);
 
@@ -185,6 +210,7 @@ void					exec_ast(ASTNode *node, t_ast **env, int input_fd,
 							int output_fd);
 void					exec_cmd(ASTNode *node, t_ast **env, int child);
 int						apply_redirections(ASTNode *node);
+void					unlink_redirection(t_token **lst);
 
 // Pour les test
 void					pwd_recognition(t_ast **env);
@@ -251,7 +277,8 @@ void					setup_sigquit_handler(void);
 void					disable_echoctl(void);
 char					**split_quote_aware(const char *s, const char *delims);
 char					**split_bash_style(const char *input);
-t_token_info			*split_bash_style_with_quotes(const char *input, int *token_count);
+t_token_info			*split_bash_style_with_quotes(const char *input,
+							int *token_count);
 void					exit_status(t_token **lst, t_ast **env);
 int						check_syntax_errors(t_token *lst);
 void					ft_putstr_fd(char *s, int fd);
@@ -259,5 +286,7 @@ void					print_exit_code(t_ast **env);
 void					handle_errno_error(const char *path);
 void					command_not_found_error(const char *cmd);
 void					exit_child(int exit_code, int child);
+ASTNode					*parse_pipeline(t_token **lst_ptr, t_ast **env);
+int						check_redirection_without_file(t_token *lst);
 
 #endif

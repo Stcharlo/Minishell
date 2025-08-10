@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 11:33:49 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 12:05:48 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/09 12:23:32 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ static int	handle_output_redirection(ASTNode *child)
 	return (0);
 }
 
-static int	process_redirection_child(ASTNode *child)
+int	process_redirection_child(ASTNode *child)
 {
 	if (!strcmp(child->value, "<") || !strcmp(child->value, "<<"))
 		return (handle_input_redirection(child));
