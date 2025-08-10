@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:06:26 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/03 06:40:34 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/10 15:32:17 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ int	check_dbl_equal(char *argv)
 
 	i = 0;
 	temp = 0;
-
 	while (argv[i])
 	{
 		if (argv[i] == '=')
@@ -50,24 +49,39 @@ void	add_export(char *argv, t_ast **env)
 	char	**temp;
 
 	i = 0;
+	if (!env || !*env || !(*env)->env || !argv)
+		return;
 	current = *env;
-	while (current->env->export[i])
+	if (!current->env->export)
+	{
+		temp = malloc(sizeof(char *) * 2);
+		if (!temp)
+			return;
+		temp[0] = cat_dup(argv);
+		temp[1] = NULL;
+		current->env->export = temp;
+		(*env)->env->error_code = 0;
+		return;
+	}
+	while (current->env->export && current->env->export[i])
 		i++;
 	temp = malloc(sizeof(char *) * (i + 2));
+	if (!temp)
+		return;
 	i = 0;
-	while (current->env->export[i])
+	while (current->env->export && current->env->export[i])
 	{
 		temp[i] = current->env->export[i];
 		i++;
 	}
 	(*env)->env->error_code = 0;
-	i++;
 	temp[i] = cat_dup(argv);
 	temp[i + 1] = NULL;
 	free(current->env->export);
 	current->env->export = temp;
 	return ;
 }
+
 void	show_export(t_ast **env)
 {
 	int		i;
@@ -77,6 +91,8 @@ void	show_export(t_ast **env)
 	i = 0;
 	j = 0;
 	current = *env;
+	if (!current->env->export)
+        return ;
 	while (current->env->export[i])
 	{
 		write(1, &current->env->export[i][j], 1);

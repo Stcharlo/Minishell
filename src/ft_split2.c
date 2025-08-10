@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 15:34:30 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 15:44:26 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/10 12:28:17 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static int	find_next_dollar(const char *s, int start, int end)
 	return (-1);
 }
 
-static int	is_var_char(char c)
+int	is_var_char2(char c)
 {
 	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
 		return (1);

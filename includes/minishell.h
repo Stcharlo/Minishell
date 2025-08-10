@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/10 11:40:39 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/10 15:37:53 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,16 @@ typedef struct s_env
 	pid_t				last_pid;
 }						t_env;
 
+typedef struct s_extract_state
+{
+	const char			*p;
+	char				*token;
+	int					i;
+	int					in_single_quote;
+	int					in_double_quote;
+	t_token_info		info;
+}						t_extract_state;
+
 typedef struct s_ast	ASTNode;
 
 typedef struct s_ast
@@ -129,8 +139,13 @@ ASTNode					*parse_command(t_token **lst_ptr, t_ast **env);
 ASTNode					*parse_pipeline(t_token **lst_ptr, t_ast **env);
 ASTNode					**combine(ASTNode **head, ASTNode *cmd);
 void					free_split(char **split);
+void					handle_backslash(t_extract_state *state);
+void					handle_quote(t_extract_state *state, char quote_type);
 ASTNode					**build_and_print_ast(t_token *lst, t_ast **env);
-
+void					handle_special_chars(t_extract_state *state);
+int						should_break(t_extract_state *state);
+void					init_extract_state(t_extract_state *state,
+							const char *p);
 char					**ft_split(char *s, const char *delim);
 /* Functions from ft_split_utils.c */
 int						is_delimiter(char c, const char *delim);
@@ -179,6 +194,7 @@ char					*expand_one(const char *str, int start, int len,
 char					*ft_strjoin_slash(char const *s1, char const *s2);
 int						is_directory(const char *path);
 int						is_var_char(char c);
+int						is_var_char2(char c);
 void					handle_quotes(const char *str, int i,
 							int *in_single_quotes, int *in_double_quotes);
 int						handle_var_expansion(char **str, int *i, t_ast **env,
@@ -195,9 +211,9 @@ int						create_list_with_quote_info(t_token **start,
 							t_token_info *tokens, int token_count);
 t_token					*ft_lstnew(char *str);
 t_token					*ft_lstnew_with_quote_info(char *str, int was_quoted);
-
+t_token_info			extract_token_with_quote_info(const char **s);
 void					execute_nodes(ASTNode **head, t_ast **env);
-
+int						is_special_char(char c);
 void					exec_pipe_right(ASTNode *node, t_ast **env,
 							int output_fd, int *fd);
 void					exec_pipe_left(ASTNode *node, t_ast **env, int input_fd,
@@ -288,5 +304,7 @@ void					command_not_found_error(const char *cmd);
 void					exit_child(int exit_code, int child);
 ASTNode					*parse_pipeline(t_token **lst_ptr, t_ast **env);
 int						check_redirection_without_file(t_token *lst);
+void					free_tokens(char **tokens);
+void					free_token_info_array(t_token_info *tokens, int count);
 
 #endif

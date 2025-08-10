@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/02 12:42:46 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/10 15:37:53 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@ void	build_in(char **tab, int i, t_ast **env)
 			export_recognition(tab, i, env);
 		if (ft_strnstr("unset", tab[i]))
 			unset_recognition(tab, i, env);
-	   if (ft_strnstr("echo", tab[i]))
-		   echo_recognition(tab, i, env);
-	   if (ft_strnstr("exit", tab[i]))
-		   exit_recognition(tab, i, env);
+		if (ft_strnstr("echo", tab[i]))
+			echo_recognition(tab, i, env);
+		if (ft_strnstr("exit", tab[i]))
+			exit_recognition(tab, i, env);
 		return ;
 	}
 	return ;
@@ -41,33 +41,34 @@ void	initialise_exp(t_ast **env, char **envp)
 {
 	t_ast	*current;
 	int		i;
-	
+
 	i = 0;
 	if (!envp)
-		return;
-	
+		return ;
 	current = *env;
 	if (!current || !current->env)
-		return;
-	
+		return ;
 	while (envp[i])
 		i++;
-	
 	current->env->export = malloc(sizeof(char *) * (i + 1));
 	if (!current->env->export)
-		return;
-	
+		return ;
 	i = 0;
 	while (envp[i])
 	{
 		current->env->export[i] = cat_dup(envp[i]);
-		if (!current->env->export[i]) {
-			// Should free previous allocations and handle error
+		if (!current->env->export[i])
+		{
+			while (--i >= 0)
+				free(current->env->export[i]);
+			free(current->env->export);
+			current->env->export = NULL;
+			return ;
 		}
 		i++;
 	}
 	current->env->export[i] = NULL;
-	return;
+	return ;
 }
 
 void	initialise_shlvl(t_ast **env)
@@ -78,30 +79,24 @@ void	initialise_shlvl(t_ast **env)
 	char	*final;
 
 	if (!env || !*env)
-		return;
-	
+		return ;
 	str = number_shlvl(env);
 	if (!str)
-		return;
-	
+		return ;
 	shlvl = ft_atoi(str);
 	free(str);
 	shlvl++;
-	
 	final = ft_itoa(shlvl);
 	if (!final)
-		return;
-	
+		return ;
 	unset_env("SHLVL=", env);
 	unset_exp("SHLVL=", env);
-	
 	merge = ft_strjoin("SHLVL=", final);
 	free(final);
-	
 	if (!merge)
-		return;
-	
+		return ;
 	add_env(merge, env);
+	free(merge);
 }
 
 char	*number_shlvl(t_ast **env)
@@ -140,14 +135,22 @@ void	free_env_complete(t_ast *env)
 	if (env->env->env)
 	{
 		while (env->env->env[i])
-			free(env->env->env[i++]);
+		{
+			if (env->env->env[i])
+				free(env->env->env[i]);
+			i++;
+		}
 		free(env->env->env);
 	}
 	i = 0;
 	if (env->env->export)
 	{
 		while (env->env->export[i])
-			free(env->env->export[i++]);
+		{
+			if (env->env->export[i])
+				free(env->env->export[i]);
+			i++;
+		}
 		free(env->env->export);
 	}
 	free(env->env);

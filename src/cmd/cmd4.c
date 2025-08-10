@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd4.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: antoine <antoine@student.42.fr>            +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:59:42 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/03 14:52:59 by antoine          ###   ########.fr       */
+/*   Updated: 2025/08/10 15:52:11 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,14 @@ void	unset_env(char *argv, t_ast **env)
 
 	j = 0;
 	count = 0;
+	if (!env || !*env || !(*env)->env || !argv || !(*env)->env->env)
+		return;
 	current = *env;
 	while (current->env->env[count])
 		count++;
-	temp = malloc(sizeof(char *) * (count));
+	temp = malloc(sizeof(char *) * (count + 1));
+	if (!temp)
+		return;
 	count = 0;
 	while (current->env->env[j])
 	{
@@ -44,10 +48,9 @@ void	unset_env(char *argv, t_ast **env)
 
 char	*cat_dup(char *s1)
 {
-    if (!s1)
-        return NULL;
-    
-    return ft_strjoin("export ", s1);
+	if (!s1)
+		return (NULL);
+	return (ft_strjoin("export ", s1));
 }
 
 void	export_recognition(char **argv, int i, t_ast **env)
@@ -62,11 +65,13 @@ void	export_recognition(char **argv, int i, t_ast **env)
 			(*env)->env->error_code = 1;
 			return ;
 		}
-		if (parse_exp(argv[i]) != 1 && !strchr(argv[i], '=')) {
+		if (parse_exp(argv[i]) != 1 && !strchr(argv[i], '='))
+		{
 			add_export(argv[i], env);
 			(*env)->env->error_code = 0;
 		}
-		if (parse_exp(argv[i]) != 1 && strchr(argv[i], '=')) {
+		if (parse_exp(argv[i]) != 1 && strchr(argv[i], '='))
+		{
 			add_env(argv[i], env);
 			add_export(argv[i], env);
 			(*env)->env->error_code = 0;
@@ -84,12 +89,26 @@ void	add_env(char *argv, t_ast **env)
 	char	**temp;
 
 	i = 0;
+	if (!env || !*env || !(*env)->env || !argv)
+		return;
 	current = *env;
-	while (current->env->env[i])
+	if (!current->env->env)
+	{
+		temp = malloc(sizeof(char *) * 2);
+		if (!temp)
+			return;
+		temp[0] = ft_strdup(argv);
+		temp[1] = NULL;
+		current->env->env = temp;
+		return;
+	}
+	while (current->env->env && current->env->env[i])
 		i++;
 	temp = malloc(sizeof(char *) * (i + 2));
+	if (!temp)
+		return;
 	i = 0;
-	while (current->env->env[i])
+	while (current->env->env && current->env->env[i])
 	{
 		temp[i] = current->env->env[i];
 		i++;
@@ -116,7 +135,7 @@ int	parse_exp(char *argv)
 		j++;
 	if (argv[j] == '=' || argv[j] == '\0')
 		return (0);
-	if (argv[j] != '\0' || argv[j] != '=')
+	if (argv[j] != '\0' && argv[j] != '=')
 		return (1);
 	return (1);
 }

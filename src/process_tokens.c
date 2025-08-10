@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 12:21:44 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 14:25:02 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/10 15:37:53 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	init_tokens_and_check(t_token **lst, char *line,
 	if (check_syntax_errors(*lst))
 	{
 		(*env)->env->error_code = 2;
-		free(*tokens);
+		free_token_info_array(*tokens, token_count);
 		free_stack(lst);
 		return (0);
 	}
@@ -51,7 +51,7 @@ static void	handle_ast_and_exec(t_token **lst, t_ast **env,
 	if (nodes)
 		free(nodes);
 	unlink_redirection(lst);
-	free(tokens);
+	free_token_info_array(tokens, ft_lstsize(*lst));
 	free_stack(lst);
 }
 
