@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd3.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:37:34 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/10 15:32:19 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/16 16:29:02 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,10 +55,7 @@ int	search_value(char *str, t_ast **env)
 	}
 	free(target);
 	if (count > 0)
-	{
-		(*env)->env->error_code = 1;
-		return (0);
-	}
+		return ((*env)->env->error_code = 1, 0);
 	(*env)->env->error_code = 0;
 	return (1);
 }
@@ -73,20 +70,28 @@ void	unset_exp(char *argv, t_ast **env)
 
 	j = 0;
 	if (!env || !*env || !(*env)->env || !argv)
-		return;
+		return ;
 	current = *env;
 	if (!current->env->export)
-		return;
+		return ;
 	target = cat_dup(argv);
 	if (!target)
-		return;
+		return ;
 	count = tab_len(current);
 	temp = malloc(sizeof(char *) * (count + 1));
 	if (!temp)
 	{
 		free(target);
-		return;
+		return ;
 	}
+	unset_exp_fnc(current, target, temp, j);
+	return ;
+}
+
+void unset_exp_fnc(t_ast *current, char *target, char **temp, int j)
+{
+	int	count;
+
 	count = 0;
 	while (current->env->export && current->env->export[j])
 	{
@@ -100,10 +105,9 @@ void	unset_exp(char *argv, t_ast **env)
 	temp[count] = NULL;
 	free_both(target, current);
 	current->env->export = temp;
-	return;
 }
 
-int	tab_len(t_ast *current)
+int tab_len(t_ast *current)
 {
 	int		count;
 

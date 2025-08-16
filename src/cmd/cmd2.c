@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd2.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:01:46 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/10 12:13:36 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/13 20:05:20 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ int	is_valid_number(const char *str)
 	while (str[i])
 	{
 		if (!isdigit((unsigned char)str[i]))
+			// || (ft_atoi(str) <= ft_atoi("-9223372036854775808"))
+			// || (ft_atoi(str) >= ft_atoi("9223372036854775807")))
 			return (0);
 		i++;
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd4.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:59:42 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/10 15:52:11 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/16 16:37:43 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,14 @@ void	unset_env(char *argv, t_ast **env)
 	temp = malloc(sizeof(char *) * (count + 1));
 	if (!temp)
 		return;
+	unset_env_fnc(current, argv, temp, j);
+	return ;
+}
+
+void unset_env_fnc(t_ast *current, char *argv, char **temp, int j)
+{
+	int	count;
+
 	count = 0;
 	while (current->env->env[j])
 	{
@@ -90,23 +98,31 @@ void	add_env(char *argv, t_ast **env)
 
 	i = 0;
 	if (!env || !*env || !(*env)->env || !argv)
-		return;
+		return ;
 	current = *env;
 	if (!current->env->env)
 	{
 		temp = malloc(sizeof(char *) * 2);
 		if (!temp)
-			return;
+			return ;
 		temp[0] = ft_strdup(argv);
 		temp[1] = NULL;
 		current->env->env = temp;
-		return;
+		return ;
 	}
 	while (current->env->env && current->env->env[i])
 		i++;
 	temp = malloc(sizeof(char *) * (i + 2));
 	if (!temp)
-		return;
+		return ;
+	add_env_fnc(current, temp, argv);
+	return ;
+}
+
+void add_env_fnc(t_ast *current, char **temp, char *argv)
+{
+	int	i;
+
 	i = 0;
 	while (current->env->env && current->env->env[i])
 	{

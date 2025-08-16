@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd5.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:06:26 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/10 15:32:17 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/16 16:50:33 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,36 +45,43 @@ int	skip_isspace(char *argv)
 void	add_export(char *argv, t_ast **env)
 {
 	t_ast	*current;
-	int		i;
 	char	**temp;
 
-	i = 0;
+	temp = NULL;
 	if (!env || !*env || !(*env)->env || !argv)
-		return;
+		return ;
 	current = *env;
 	if (!current->env->export)
 	{
 		temp = malloc(sizeof(char *) * 2);
 		if (!temp)
-			return;
+			return ;
 		temp[0] = cat_dup(argv);
 		temp[1] = NULL;
 		current->env->export = temp;
 		(*env)->env->error_code = 0;
-		return;
+		return ;
 	}
+	add_exp_fnc(current, temp, argv);
+	return ;
+}
+
+void	add_exp_fnc(t_ast *current, char **temp, char *argv)
+{
+	int	i;
+
+	i = 0;
 	while (current->env->export && current->env->export[i])
 		i++;
 	temp = malloc(sizeof(char *) * (i + 2));
 	if (!temp)
-		return;
-	i = 0;
+		return ;
 	while (current->env->export && current->env->export[i])
 	{
 		temp[i] = current->env->export[i];
 		i++;
 	}
-	(*env)->env->error_code = 0;
+	current->env->error_code = 0;
 	temp[i] = cat_dup(argv);
 	temp[i + 1] = NULL;
 	free(current->env->export);

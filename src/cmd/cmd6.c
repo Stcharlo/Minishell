@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmd6.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:10:14 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/10 15:32:18 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/16 18:54:09 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,70 +17,101 @@ extern int	g_exit_code;
 void	cd_recognition(char **tab, int i, t_ast **env)
 {
 	char	*buffer;
-	char	*oldpwd;
-	char	*pwd;
 	char	*buffer2;
-	int		error_type;
 
 	buffer = malloc(1024);
 	buffer2 = malloc(1024);
 	if (!buffer || !buffer2)
 	{
-		if (buffer) free(buffer);
-		if (buffer2) free(buffer2);
-		(*env)->env->error_code = 1;
-		return;
+		free_buffer(buffer, buffer2, env);
+		return ;
 	}
-	
-	// Skip "cd" command
 	if (tab[i])
 		i++;
-	
-	// Handle case where no directory is specified
 	if (!tab[i])
 	{
-		char *home = getenv("HOME");
-		if (home)
-		{
-			oldpwd = getcwd(buffer2, 1024);
-			if (chdir(home) == 0)
-			{
-				pwd = getcwd(buffer, 1024);
-				pwd_change(pwd, oldpwd, env);
-				(*env)->env->error_code = 0;
-			}
-		}
-		free(buffer);
-		free(buffer2);
-		return;
+		cd_only(tab, i, env);
+		return ;
 	}
-	
-	// Too many arguments
 	if (tab[i + 1])
-	{
-		free(buffer);
-		free(buffer2);
-		cd_exit_code();
-	}
-	
-	error_type = access_error(tab[i]);
-	if (error_type == 0)
-	{
-		oldpwd = getcwd(buffer2, 1024);
-		if (chdir(tab[i]) != 0)
-		{
-			free(buffer);
-			free(buffer2);
-			return;
-		}
-		pwd = getcwd(buffer, 1024);
-		pwd_change(pwd, oldpwd, env);
-		(*env)->env->error_code = 0;
-	}
-	print_error(error_type, tab[i], env);
+		free_tab1(buffer, buffer2);
+	if (access_error(tab[i]) == 0)
+		cd_rec_fnc(tab[i], buffer, buffer2, env);
+	print_error(access_error(tab[i]), tab[i], env);
 	free(buffer);
 	free(buffer2);
-	return;
+	return ;
+}
+
+void	cd_only(char **tab, int i, t_ast **env)
+{
+	tab[i] = get_env_var(env, "HOME=");
+	tab[i + 1] = NULL;
+	i--;
+	cd_recognition(tab, i, env);
+}
+
+void	free_tab1(char *buffer, char *buffer2)
+{
+	free(buffer);
+	free(buffer2);
+	cd_exit_code();
+}
+
+void	cd_rec_fnc(char *tab, char *buffer, char *buffer2, t_ast **env)
+{
+	char	*oldpwd;
+	char	*pwd;
+
+	oldpwd = NULL;
+	pwd = NULL;
+	oldpwd = getcwd(buffer2, 1024);
+	if (chdir(tab) != 0)
+	{
+		free(buffer);
+		free(buffer2);
+		return ;
+	}
+	pwd = getcwd(buffer, 1024);
+	pwd_change(pwd, oldpwd, env);
+	(*env)->env->error_code = 0;
+	return ;
+}
+
+void	free_buffer(char *buffer, char *buffer2, t_ast **env)
+{
+	if (buffer)
+		free(buffer);
+	if (buffer2)
+		free(buffer);
+	(*env)->env->error_code = 1;
+	return ;
+}
+
+char	*get_env_var(t_ast **env, char *str)
+{
+	int		i;
+	int		j;
+	int		a;
+	char *copy;
+
+	i = 0;
+	a = 0;
+	copy = malloc(1024);
+	if (!copy)
+		return NULL;
+	j = strlen(str);
+	if (!(*env)->env->env[i])
+		return NULL;
+	while ((*env)->env->env[i] && strncmp((*env)->env->env[i], str, strlen(str)))
+		i++;
+	if ((*env)->env->env[i] && !strncmp((*env)->env->env[i], str, strlen(str)))
+	{
+		while ((*env)->env->env[i][j] != '\0')
+			copy[a++] = (*env)->env->env[i][j++];
+		i++;
+	}
+	return (strdup(copy));
 }
 
 void	cd_exit_code(void)
@@ -107,9 +138,9 @@ void	print_error(int num, char *tab, t_ast **env)
 	{
 		fprintf(stderr, "cd: %s: Permission denied\n", tab);
 		(*env)->env->error_code = 1;
-		return;
+		return ;
 	}
-	return;
+	return ;
 }
 
 int	access_error(char *tab)

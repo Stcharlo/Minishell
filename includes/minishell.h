@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/10 15:37:53 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/16 18:53:25 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,7 +257,7 @@ void					free_split(char **split);
 void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
 void					initialise_shlvl(t_ast **env);
 char					*number_shlvl(t_ast **env);
-int						ft_atoi(const char *nptr);
+long long				ft_atoi(const char *nptr);
 char					*ft_itoa(int n);
 void					print_error(int num, char *tab, t_ast **env);
 int						access_error(char *tab);
@@ -273,6 +273,16 @@ int						tab_len(t_ast *current);
 void					cd_exit_code(void);
 char					*path_var_set(t_ast *env, const char *key);
 char					*full_path(char **paths, const char *cmd);
+void					unset_exp_fnc(t_ast *current, char *target, char **temp, int j);
+void					del_export(t_ast **env);
+void					unset_env_fnc(t_ast *current, char *argv, char **temp, int j);
+void					add_env_fnc(t_ast *current, char **temp, char *argv);
+void					add_exp_fnc(t_ast *current, char **temp, char *argv);
+char					*get_env_var(t_ast **env, char *str);
+void					free_buffer(char *buffer, char *buffer2, t_ast **env);
+void					cd_rec_fnc(char *tab, char *buffer, char *buffer2, t_ast **env);
+void					free_tab1(char *buffer, char *buffer2);
+void					cd_only(char **tab, int i, t_ast **env);
 
 // gnl
 char					*ft_strjoin(char const *s1, char const *s2);
@@ -303,7 +313,6 @@ void					handle_errno_error(const char *path);
 void					command_not_found_error(const char *cmd);
 void					exit_child(int exit_code, int child);
 ASTNode					*parse_pipeline(t_token **lst_ptr, t_ast **env);
-int						check_redirection_without_file(t_token *lst);
 void					free_tokens(char **tokens);
 void					free_token_info_array(t_token_info *tokens, int count);
 
