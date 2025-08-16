@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:37:34 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 16:29:02 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/16 19:01:32 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,26 +88,7 @@ void	unset_exp(char *argv, t_ast **env)
 	return ;
 }
 
-void unset_exp_fnc(t_ast *current, char *target, char **temp, int j)
-{
-	int	count;
-
-	count = 0;
-	while (current->env->export && current->env->export[j])
-	{
-		if (ft_strncmp(current->env->export[j], (target), strlen(target)) != 0)
-			temp[count++] = current->env->export[j];
-		else if (ft_strncmp(current->env->export[j],
-				(target), strlen(target)) == 0)
-			free(current->env->export[j]);
-		j++;
-	}
-	temp[count] = NULL;
-	free_both(target, current);
-	current->env->export = temp;
-}
-
-int tab_len(t_ast *current)
+int	tab_len(t_ast *current)
 {
 	int		count;
 

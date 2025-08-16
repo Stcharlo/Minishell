@@ -20,11 +20,11 @@ WHITE = \033[0;37m
 
 # Source files (all with correct relative paths and .c extensions)
 SRC = main.c utils.c utils2.c process_tokens.c quotes.c libft.c libft2.c libft3.c libft4.c  expand2.c handle_quotes.c \
-	ft_split.c ft_split_utils.c ft_split2.c ft_itoa.c expand.c chained_list.c chained_list2.c exit_status.c bash_split.c bash_split2.c bash_split3.c syntax.c syntax_check.c \
+	ft_split.c ft_split_utils.c ft_split2.c ft_itoa.c expand.c chained_list.c chained_list2.c exit_status.c bash_split.c bash_split2.c bash_split3.c syntax_check.c \
 	heredoc/get_next_line.c heredoc/heredoc.c heredoc/heredoc_utlis.c quotes2.c \
 	execution_posix/exec.c execution_posix/exec_recursion.c execution_posix/exec_pipe_node.c \
 	execution_posix/exec_recursion2.c execution_posix/exec_cmd.c execution_posix/exec_redirection.c \
-	cmd/cmd1.c cmd/cmd2.c cmd/cmd3.c cmd/cmd4.c cmd/cmd5.c cmd/cmd6.c cmd/cmd7.c cmd/cmd8.c \
+	cmd/cmd1.c cmd/cmd2.c cmd/cmd3.c cmd/cmd4.c cmd/cmd5.c cmd/cmd6.c cmd/cmd7.c cmd/cmd8.c cmd/cmd9.c cmd/cmd10.c \
 	ast/new_ast.c ast/new_ast2.c ast/new_ast3.c ast/new_ast4.c ast/new_ast5.c signal/signal.c
 
 # Object files, with obj/ prefix and .o extension

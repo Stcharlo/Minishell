@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/16 18:53:25 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/16 19:09:02 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,7 +257,7 @@ void					free_split(char **split);
 void					pwd_change(char *pwd, char *oldpwd, t_ast **env);
 void					initialise_shlvl(t_ast **env);
 char					*number_shlvl(t_ast **env);
-long long				ft_atoi(const char *nptr);
+int						ft_atoi(const char *nptr);
 char					*ft_itoa(int n);
 void					print_error(int num, char *tab, t_ast **env);
 int						access_error(char *tab);

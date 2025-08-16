@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:06:26 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 16:50:33 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/16 19:03:16 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,29 +66,6 @@ void	add_export(char *argv, t_ast **env)
 	return ;
 }
 
-void	add_exp_fnc(t_ast *current, char **temp, char *argv)
-{
-	int	i;
-
-	i = 0;
-	while (current->env->export && current->env->export[i])
-		i++;
-	temp = malloc(sizeof(char *) * (i + 2));
-	if (!temp)
-		return ;
-	while (current->env->export && current->env->export[i])
-	{
-		temp[i] = current->env->export[i];
-		i++;
-	}
-	current->env->error_code = 0;
-	temp[i] = cat_dup(argv);
-	temp[i + 1] = NULL;
-	free(current->env->export);
-	current->env->export = temp;
-	return ;
-}
-
 void	show_export(t_ast **env)
 {
 	int		i;
@@ -99,7 +76,7 @@ void	show_export(t_ast **env)
 	j = 0;
 	current = *env;
 	if (!current->env->export)
-        return ;
+		return ;
 	while (current->env->export[i])
 	{
 		write(1, &current->env->export[i][j], 1);

@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:59:42 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 16:37:43 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/16 19:02:50 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,25 +32,6 @@ void	unset_env(char *argv, t_ast **env)
 	if (!temp)
 		return;
 	unset_env_fnc(current, argv, temp, j);
-	return ;
-}
-
-void unset_env_fnc(t_ast *current, char *argv, char **temp, int j)
-{
-	int	count;
-
-	count = 0;
-	while (current->env->env[j])
-	{
-		if (ft_strncmp(current->env->env[j], argv, strlen(argv)) != 0)
-			temp[count++] = current->env->env[j];
-		else if (ft_strncmp(current->env->env[j], argv, strlen(argv)) == 0)
-			free(current->env->env[j]);
-		j++;
-	}
-	temp[count] = NULL;
-	free(current->env->env);
-	current->env->env = temp;
 	return ;
 }
 
@@ -116,23 +97,6 @@ void	add_env(char *argv, t_ast **env)
 	if (!temp)
 		return ;
 	add_env_fnc(current, temp, argv);
-	return ;
-}
-
-void add_env_fnc(t_ast *current, char **temp, char *argv)
-{
-	int	i;
-
-	i = 0;
-	while (current->env->env && current->env->env[i])
-	{
-		temp[i] = current->env->env[i];
-		i++;
-	}
-	temp[i] = ft_strdup(argv);
-	temp[i + 1] = NULL;
-	free(current->env->env);
-	current->env->env = temp;
 	return ;
 }
 
