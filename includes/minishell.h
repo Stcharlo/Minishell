@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/16 19:09:02 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/17 13:04:14 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 
 # define _POSIX_C_SOURCE 200809L
 # define ECHOCTL 0001000
+
+// Global variables
+extern int				g_exit_code;
 
 # include <ctype.h>
 # include <dirent.h>
@@ -172,18 +175,21 @@ char					**ft_split_once_range(const char *s, char sep,
 							int start, int end);
 char					**ft_split_dollar_range(const char *s, int start,
 							int end);
-
+void					tab_to_file(char **lines, const char *filename);
 char					*ft_substr(char const *s, unsigned int start,
 							size_t len);
 void					*ft_calloc(size_t nmemb, size_t size);
 char					*ft_strjoin(char const *s1, char const *s2);
 char					*ft_strchr(const char *s, int c);
-
+int						open_tempfile(const char *filename, char *temp_path,
+							size_t path_size);
 void					process_tokens(t_token **lst, char *line, t_ast **env);
 char					*get_input(void);
 void					infinite_read(t_token **lst, t_ast **env);
 char					*get_value(char *var, int n, t_ast **env);
-
+int						write_all_lines(int fd, char **lines);
+void					link_or_copy_temp(const char *temp_path,
+							const char *filename);
 char					*unquoted_var_expansion(char *str, t_ast **env);
 char					*expand_unquoted_var_at(char *str, int start, int len,
 							t_ast **env);
@@ -191,6 +197,7 @@ char					*expand_variable(char *str, t_ast **env);
 int						find_next_expand(const char *str, int *start, int *len);
 char					*expand_one(const char *str, int start, int len,
 							t_ast **env);
+int						is_limiter_line(char *line, char *limiter);
 char					*ft_strjoin_slash(char const *s1, char const *s2);
 int						is_directory(const char *path);
 int						is_var_char(char c);
@@ -200,6 +207,8 @@ void					handle_quotes(const char *str, int i,
 int						handle_var_expansion(char **str, int *i, t_ast **env,
 							int in_single_quotes);
 int						ft_strnstr(char *big, char *little);
+int						check_redirection_without_file(t_token *lst);
+int						check_invalid_combinations(t_token *lst);
 void					show_list(t_token *list);
 void					free_stack(t_token **stack);
 int						ft_lstsize(t_token *lst);
@@ -273,14 +282,17 @@ int						tab_len(t_ast *current);
 void					cd_exit_code(void);
 char					*path_var_set(t_ast *env, const char *key);
 char					*full_path(char **paths, const char *cmd);
-void					unset_exp_fnc(t_ast *current, char *target, char **temp, int j);
+void					unset_exp_fnc(t_ast *current, char *target, char **temp,
+							int j);
 void					del_export(t_ast **env);
-void					unset_env_fnc(t_ast *current, char *argv, char **temp, int j);
+void					unset_env_fnc(t_ast *current, char *argv, char **temp,
+							int j);
 void					add_env_fnc(t_ast *current, char **temp, char *argv);
 void					add_exp_fnc(t_ast *current, char **temp, char *argv);
 char					*get_env_var(t_ast **env, char *str);
 void					free_buffer(char *buffer, char *buffer2, t_ast **env);
-void					cd_rec_fnc(char *tab, char *buffer, char *buffer2, t_ast **env);
+void					cd_rec_fnc(char *tab, char *buffer, char *buffer2,
+							t_ast **env);
 void					free_tab1(char *buffer, char *buffer2);
 void					cd_only(char **tab, int i, t_ast **env);
 
@@ -292,15 +304,23 @@ char					*ft_extract(char *buffer);
 char					*ft_buffer(int fd, char *buffer);
 char					*get_next_line(int fd);
 
-void					start_heredoc(char *limiter);
-void					tab_to_file(char **lines, const char *filename);
+// Heredoc
 void					clean_heredoc(char **argv);
-void					read_heredoc(char *limiter);
+void					read_heredoc(char *limiter, int quoted_limiter,
+							t_ast **env);
 void					free_tab(char **tab);
-void					check_heredoc(t_token **lst);
+void					check_heredoc(t_token **lst, t_ast **env);
+void					copy_tmp_to_file(const char *temp_path,
+							const char *filename);
+void					start_heredoc(char *limiter, int quoted_limiter,
+							t_ast **env);
+
 void					setup_sigint_handler(void);
 void					setup_sigquit_handler(void);
 void					disable_echoctl(void);
+void					setup_heredoc_signals(void);
+void					handle_sigint_heredoc(int sig_num);
+void					restore_parent_signals(void);
 char					**split_quote_aware(const char *s, const char *delims);
 char					**split_bash_style(const char *input);
 t_token_info			*split_bash_style_with_quotes(const char *input,

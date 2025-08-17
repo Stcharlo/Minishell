@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 11:33:49 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 12:23:32 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/17 12:01:40 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,16 @@ static int	handle_output_redirection(ASTNode *child)
 
 int	process_redirection_child(ASTNode *child)
 {
-	if (!strcmp(child->value, "<") || !strcmp(child->value, "<<"))
+	if (g_exit_code == 130)
+		return (-1);
+	if (!strcmp(child->value, "<"))
 		return (handle_input_redirection(child));
+	else if (!strcmp(child->value, "<<"))
+	{
+		if (access(child->target->value, F_OK) == -1)
+			return (-1);
+		return (handle_input_redirection(child));
+	}
 	else if (!strcmp(child->value, ">") || !strcmp(child->value, ">>"))
 		return (handle_output_redirection(child));
 	return (0);

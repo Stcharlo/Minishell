@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signal.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/11 19:28:11 by agaroux           #+#    #+#             */
-/*   Updated: 2025/07/20 19:20:14 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/17 12:11:18 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,11 @@ extern int	g_exit_code;
 
 void	handle_sigint_parent(int sig_num)
 {
-	write(1, "Minishell> \n", 12);
+	const char	*prompt = "Minishell> ";
+
+	write(STDOUT_FILENO, "\r", 1);
+	write(STDOUT_FILENO, prompt, 11);
+	write(STDOUT_FILENO, "^c\n", 3);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();

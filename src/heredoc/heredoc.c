@@ -6,45 +6,62 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 14:30:17 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 12:10:52 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/17 12:43:38 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-void	check_heredoc(t_token **lst)
+void	start_heredoc(char *limiter, int quoted_limiter, t_ast **env)
 {
-	t_token	*list;
-
-	list = *lst;
-	while (list)
-	{
-		if (list->type == HEREDOC)
-		{
-			if (list->next && list->next->value)
-				start_heredoc(list->next->value);
-		}
-		list = list->next;
-	}
+	setup_heredoc_signals();
+	read_heredoc(limiter, quoted_limiter, env);
+	restore_parent_signals();
 }
 
-void	start_heredoc(char *limiter)
-{
-	read_heredoc(limiter);
-}
-
-void	tab_to_file(char **lines, const char *filename)
+void	copy_tmp_to_file(const char *temp_path, const char *filename)
 {
 	int		fd;
-	int		i;
-	ssize_t	written;
+	int		src_fd;
+	char	buffer[4096];
+	ssize_t	bytes_read;
 
 	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd < 0)
+	if (fd >= 0)
 	{
-		perror("open");
-		return ;
+		src_fd = open(temp_path, O_RDONLY);
+		if (src_fd >= 0)
+		{
+			bytes_read = read(src_fd, buffer, sizeof(buffer));
+			while (bytes_read > 0)
+			{
+				write(fd, buffer, bytes_read);
+				bytes_read = read(src_fd, buffer, sizeof(buffer));
+			}
+			close(src_fd);
+		}
+		close(fd);
 	}
+}
+
+int	open_tempfile(const char *filename, char *temp_path,
+				size_t path_size)
+{
+	int	fd;
+
+	snprintf(temp_path, path_size, "/tmp/minishell_heredoc_%s_%d", filename,
+		getpid());
+	fd = open(temp_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd < 0)
+		perror("open");
+	return (fd);
+}
+
+int	write_all_lines(int fd, char **lines)
+{
+	int			i;
+	ssize_t		written;
+
 	i = 0;
 	while (lines && lines[i])
 	{
@@ -52,48 +69,17 @@ void	tab_to_file(char **lines, const char *filename)
 		if (written < 0)
 		{
 			perror("write");
-			close(fd);
-			return ;
+			return (-1);
 		}
 		write(fd, "\n", 1);
 		i++;
 	}
-	close(fd);
-	free_tab(lines);
+	return (0);
 }
 
-void	clean_heredoc(char **argv)
+void	link_or_copy_temp(const char *temp_path, const char *filename)
 {
-	if (!ft_strcmp(argv[1], "here_doc"))
-		free(argv[1]);
-	get_next_line(-1);
-	unlink("here_doc");
-}
-
-void	read_heredoc(char *limiter)
-{
-	char	*line;
-	char	*str;
-	char	**res;
-
-	str = ft_strdup("");
-	if (!str)
-		return ;
-	while (1)
-	{
-		write(1, "> ", 2);
-		line = get_next_line(0);
-		if (!line)
-			break ;
-		if (ft_strcmp(line, limiter) == 10)
-		{
-			free(line);
-			break ;
-		}
-		str = ft_strjoin(str, line);
-		free(line);
-	}
-	res = ft_split(str, "\n");
-	free(str);
-	tab_to_file(res, limiter);
+	unlink(filename);
+	if (symlink(temp_path, filename) < 0)
+		copy_tmp_to_file(temp_path, filename);
 }
