@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:47:07 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 16:28:37 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/18 15:57:40 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,36 +133,4 @@ char	*number_shlvl(t_ast **env)
 		i++;
 	}
 	return (ft_strdup("0"));
-}
-
-void	free_env_complete(t_ast *env)
-{
-	int	i;
-
-	i = 0;
-	if (!env || !env->env)
-		return ;
-	if (env->env->env)
-	{
-		while (env->env->env[i])
-		{
-			if (env->env->env[i])
-				free(env->env->env[i]);
-			i++;
-		}
-		free(env->env->env);
-	}
-	i = 0;
-	if (env->env->export)
-	{
-		while (env->env->export[i])
-		{
-			if (env->env->export[i])
-				free(env->env->export[i]);
-			i++;
-		}
-		free(env->env->export);
-	}
-	free(env->env);
-	free(env);
 }

@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:59:42 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 19:02:50 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/18 15:49:22 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,13 @@ void	unset_env(char *argv, t_ast **env)
 	j = 0;
 	count = 0;
 	if (!env || !*env || !(*env)->env || !argv || !(*env)->env->env)
-		return;
+		return ;
 	current = *env;
 	while (current->env->env[count])
 		count++;
 	temp = malloc(sizeof(char *) * (count + 1));
 	if (!temp)
-		return;
+		return ;
 	unset_env_fnc(current, argv, temp, j);
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/16 19:00:32 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 19:05:25 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:23:51 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ void	add_exp_fnc(t_ast *current, char **temp, char *argv)
 	temp = malloc(sizeof(char *) * (i + 2));
 	if (!temp)
 		return ;
+	i = 0;
 	while (current->env->export && current->env->export[i])
 	{
 		temp[i] = current->env->export[i];

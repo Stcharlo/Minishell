@@ -25,7 +25,7 @@ SRC = main.c utils.c utils2.c process_tokens.c quotes.c libft.c libft2.c libft3.
 	heredoc/get_next_line.c heredoc/heredoc.c heredoc/heredoc_utlis.c heredoc/heredoc_utils2.c quotes2.c heredoc/read_heredoc.c \
 	execution_posix/exec.c execution_posix/exec_recursion.c execution_posix/exec_pipe_node.c \
 	execution_posix/exec_recursion2.c execution_posix/exec_cmd.c execution_posix/exec_redirection.c \
-	cmd/cmd1.c cmd/cmd2.c cmd/cmd3.c cmd/cmd4.c cmd/cmd5.c cmd/cmd6.c cmd/cmd7.c cmd/cmd8.c cmd/cmd9.c cmd/cmd10.c \
+	cmd/cmd1.c cmd/cmd2.c cmd/cmd3.c cmd/cmd4.c cmd/cmd5.c cmd/cmd6.c cmd/cmd7.c cmd/cmd8.c cmd/cmd9.c cmd/cmd10.c cmd/cmd11.c \
 	ast/new_ast.c ast/new_ast2.c ast/new_ast3.c ast/new_ast4.c ast/new_ast5.c signal/signal.c signal/heredoc_signals.c
 
 # Object files, with obj/ prefix and .o extension

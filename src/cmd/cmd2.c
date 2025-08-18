@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 17:01:46 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/13 20:05:20 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/18 16:08:11 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ int	is_valid_number(const char *str)
 	while (str[i])
 	{
 		if (!isdigit((unsigned char)str[i]))
-			// || (ft_atoi(str) <= ft_atoi("-9223372036854775808"))
-			// || (ft_atoi(str) >= ft_atoi("9223372036854775807")))
 			return (0);
 		i++;
 	}
@@ -46,22 +44,13 @@ void	exit_recognition(char **argv, int i, t_ast **env)
 	while (argv[a])
 		a++;
 	if (a > 2)
-	{
-		(*env)->env->error_code = 1;
-		exit((*env)->env->error_code);
-	}
+		too_much_exit(env);
 	if (argv[i + 1])
 	{
 		if (!is_valid_number(argv[i + 1]))
-		{
-			(*env)->env->error_code = 2;
-			valid_number_fail(env, argv[i + 1]);
-		}
+			number_not_valid(argv, i, env);
 		else if (argv[i + 1][0] == '-' || argv[i + 1][0] == '+')
-		{
-			(*env)->env->error_code = (256 + atoi(argv[i + 1])) % 256;
-			num_has_sign(env);
-		}
+			number_has_sign(argv, i, env);
 		else
 		{
 			(*env)->env->error_code = atoi(argv[i + 1]) % 256;
@@ -71,9 +60,7 @@ void	exit_recognition(char **argv, int i, t_ast **env)
 	else
 	{
 		if (g_exit_code >= 128)
-		{
 			(*env)->env->error_code = g_exit_code;
-		}
 		exit((*env)->env->error_code);
 	}
 }

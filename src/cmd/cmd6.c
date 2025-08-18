@@ -6,7 +6,7 @@
 /*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 18:10:14 by stcharlo          #+#    #+#             */
-/*   Updated: 2025/08/16 19:07:27 by stcharlo         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:40:10 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,30 +16,18 @@ extern int	g_exit_code;
 
 void	cd_recognition(char **tab, int i, t_ast **env)
 {
-	char	*buffer;
-	char	*buffer2;
-
-	buffer = malloc(1024);
-	buffer2 = malloc(1024);
-	if (!buffer || !buffer2)
-	{
-		free_buffer(buffer, buffer2, env);
-		return ;
-	}
 	if (tab[i])
 		i++;
 	if (!tab[i])
 	{
-		cd_only(tab, i, env);
+		cd_only(env);
 		return ;
 	}
 	if (tab[i + 1])
-		free_tab1(buffer, buffer2);
-	if (access_error(tab[i]) == 0)
-		cd_rec_fnc(tab[i], buffer, buffer2, env);
+		cd_exit_code();
+	if (tab[i] && access_error(tab[i]) == 0)
+		cd_rec_fnc(tab[i], env);
 	print_error(access_error(tab[i]), tab[i], env);
-	free(buffer);
-	free(buffer2);
 	return ;
 }
 
@@ -47,7 +35,6 @@ void	print_error(int num, char *tab, t_ast **env)
 {
 	if (!env || !*env || !(*env)->env)
 		return ;
-	
 	if (num == 1)
 	{
 		if (!tab)

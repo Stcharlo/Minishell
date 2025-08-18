@@ -3,21 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
+/*   By: stcharlo <stcharlo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/09 16:46:58 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/17 13:04:14 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/18 18:39:36 by stcharlo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
-
-# define _POSIX_C_SOURCE 200809L
-# define ECHOCTL 0001000
-
-// Global variables
-extern int				g_exit_code;
 
 # include <ctype.h>
 # include <dirent.h>
@@ -35,6 +29,12 @@ extern int				g_exit_code;
 # include <sys/wait.h>
 # include <termios.h>
 # include <unistd.h>
+
+# define _POSIX_C_SOURCE 200809L
+# define ECHOCTL 0001000
+
+// Global variables
+extern int				g_exit_code;
 
 # define BUILTIN "echo:pwd:cd:export:unset:env:exit"
 # define METACHAR "\t:\n:|:&:;:(:):<:>"
@@ -109,21 +109,13 @@ typedef struct s_ast	ASTNode;
 typedef struct s_ast
 {
 	int					type;
-	char *value; // e.g. "echo", ">", "|", etc.
-
-	// For pipeline and binary operators:
-	ASTNode *left;  // Left child (e.g. left command or left pipe)
-	ASTNode *right; // Right child (e.g. right command or right pipe)
-
-	// For commands:
-	ASTNode **children; // Array of pointers to arguments and redirections
+	char				*value;
+	ASTNode				*left;
+	ASTNode				*right;
+	ASTNode				**children;
 	int					child_count;
-
-	// For redirections:
-	ASTNode *target; // For redirection nodes, points to the target file node
-
-	// Optionally:
-	ASTNode *parent; // Pointer to parent node (can be NULL for root)
+	ASTNode				*target;
+	ASTNode				*parent;
 	t_env				*env;
 }						t_ast;
 
@@ -291,10 +283,13 @@ void					add_env_fnc(t_ast *current, char **temp, char *argv);
 void					add_exp_fnc(t_ast *current, char **temp, char *argv);
 char					*get_env_var(t_ast **env, char *str);
 void					free_buffer(char *buffer, char *buffer2, t_ast **env);
-void					cd_rec_fnc(char *tab, char *buffer, char *buffer2,
-							t_ast **env);
+void					cd_rec_fnc(char *tab, t_ast **env);
 void					free_tab1(char *buffer, char *buffer2);
-void					cd_only(char **tab, int i, t_ast **env);
+void					cd_only(t_ast **env);
+void					free_env_env(t_ast *env);
+void					number_has_sign(char **argv, int i, t_ast **env);
+void					too_much_exit(t_ast **env);
+void					number_not_valid(char **argv, int i, t_ast **env);
 
 // gnl
 char					*ft_strjoin(char const *s1, char const *s2);
