@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 11:12:41 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 11:37:28 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:57:07 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ void	execute_nodes(ASTNode **head, t_ast **env)
 
 	if (!head || !(*head))
 		return ;
+
 	saved_stdout = dup(STDOUT_FILENO);
 	saved_stdin = dup(STDIN_FILENO);
 	exec_ast(*head, env, STDIN_FILENO, STDOUT_FILENO);

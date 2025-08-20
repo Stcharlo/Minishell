@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 11:28:25 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/20 13:55:23 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ ASTNode	*create_ast_node(int type, char *value)
 	if (!new)
 		return (NULL);
 	new->type = type;
-	new->value = strdup(value);
+	new->value = ft_strdup(value);
 	if (!new->value)
 		return (NULL);
 	new->left = NULL;

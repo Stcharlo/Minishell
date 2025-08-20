@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 12:28:00 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 11:59:05 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/20 16:37:55 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,26 @@
 
 extern int	g_exit_code;
 
+void free_env_variables(char **env)
+{
+    int i = 0;
+
+    if (!env)
+        return;
+
+    while (env[i])
+    {
+        free(env[i]); // Free each string
+        i++;
+    }
+    free(env); // Free the array itself
+}
+
 void	exec_pipe_right(ASTNode *node, t_ast **env, int output_fd, int *fd)
 {
-	if (fd[0] != STDIN_FILENO)
+    int error_code; // Store the error code before freeing
+    
+    if (fd[0] != STDIN_FILENO)
 	{
 		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
@@ -25,12 +42,19 @@ void	exec_pipe_right(ASTNode *node, t_ast **env, int output_fd, int *fd)
 		dup2(output_fd, STDOUT_FILENO);
 	close(fd[1]);
 	exec_ast(node->right, env, STDIN_FILENO, output_fd);
-	exit((*env)->env->error_code);
+	error_code = (*env)->env->error_code;
+	ast_free(node);
+	free_env_complete(*env);
+	//free_env_variables((*env)->env->env);
+	
+	exit(error_code);
 }
 
 void	exec_pipe_left(ASTNode *node, t_ast **env, int input_fd, int *fd)
 {
-	if (input_fd != STDIN_FILENO)
+    int error_code;
+    
+    if (input_fd != STDIN_FILENO)
 	{
 		dup2(input_fd, STDIN_FILENO);
 		close(input_fd);
@@ -42,7 +66,11 @@ void	exec_pipe_left(ASTNode *node, t_ast **env, int input_fd, int *fd)
 	}
 	close(fd[0]);
 	exec_ast(node->left, env, input_fd, STDOUT_FILENO);
-	exit((*env)->env->error_code);
+	error_code = (*env)->env->error_code;
+	ast_free(node);
+	free_env_complete(*env);
+	//free_env_variables((*env)->env->env);
+	exit(error_code);
 }
 
 /// @brief recursive function that will check if the node is a pipe or a command

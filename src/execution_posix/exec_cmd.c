@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 11:36:43 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 11:40:01 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/20 14:56:30 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,14 @@ static void	execute_command(char **tab, char *path, t_ast **env, int child)
 	handle_path_errors(path, tab, env, child);
 	if (execve(path, tab, (*env)->env->env) < 0)
 	{
+		free(path);
+		free_tab(tab);
 		(*env)->env->error_code = 1;
 		exit_child((*env)->env->error_code, child);
 		return ;
 	}
+	free(path);
+	free_tab(tab);
 	(*env)->env->error_code = 0;
 	exit_child((*env)->env->error_code, child);
 }

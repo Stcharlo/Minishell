@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 11:52:35 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 12:06:03 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/20 16:35:16 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ static void	handle_child_process(ASTNode *node, t_ast **env, int input_fd,
 static void	handle_parent_process(pid_t pid, t_ast **env)
 {
 	int	status;
-
+	
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
 	{
@@ -61,18 +61,30 @@ void	exec_command_node(ASTNode *node, t_ast **env, int input_fd,
 	pid_t	pid;
 
 	if (!cmd_recognize(node->value))
-	{
 		exec_cmd(node, env, 0);
-	}
 	else
 	{
 		pid = fork();
 		if (pid < 0)
+		{
+			// Close file descriptors on fork error
+			if (input_fd != STDIN_FILENO)
+				close(input_fd);
+			if (output_fd != STDOUT_FILENO)
+				close(output_fd);
 			return ;
+		}
 		if (pid == 0)
 			handle_child_process(node, env, input_fd, output_fd);
 		else
+		{
+			// Parent should close unused file descriptors
+			if (input_fd != STDIN_FILENO)
+				close(input_fd);
+			if (output_fd != STDOUT_FILENO)
+				close(output_fd);
 			handle_parent_process(pid, env);
+		}
 	}
 	return ;
 }
