@@ -6,7 +6,7 @@
 /*   By: agaroux <agaroux@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:04:04 by agaroux           #+#    #+#             */
-/*   Updated: 2025/08/09 11:25:10 by agaroux          ###   ########.fr       */
+/*   Updated: 2025/08/20 13:45:31 by agaroux          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,22 @@ int	define_type(char *str, t_ast **env)
 
 void	ast_free(ASTNode *node)
 {
-	int	i;
+    int	i;
 
-	i = 0;
-	if (!node)
-		return ;
-	free(node->value);
-	while (i < node->child_count)
-		ast_free(node->children[i++]);
-	if (node->target)
-		ast_free(node->target);
-	free(node->children);
-	free(node);
+    if (!node)
+        return ;
+    printf("Freeing node: %p, value: %s\n", (void*)node, node->value); // Debug print
+    free(node->value);
+    for (i = 0; i < node->child_count; i++)
+        ast_free(node->children[i]);
+    free(node->children);
+    if (node->left)
+        ast_free(node->left);
+    if (node->right)
+        ast_free(node->right);
+    if (node->target)
+        ast_free(node->target);
+    free(node);
 }
 
 void	set_ast_left(ASTNode *parent, ASTNode *child)
